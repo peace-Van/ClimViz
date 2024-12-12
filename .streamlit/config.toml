@@ -4,3 +4,6 @@ toolbarMode = "minimal"
 
 [global]
 disableWidgetStateDuplicationWarning = true
+
+[theme]
+base = "light"
