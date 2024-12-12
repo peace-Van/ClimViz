@@ -1,0 +1,6 @@
+[client]
+showErrorDetails = "type"
+toolbarMode = "minimal"
+
+[global]
+disableWidgetStateDuplicationWarning = true
