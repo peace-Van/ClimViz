@@ -570,7 +570,9 @@ if __name__ == "__main__":
             st.markdown(
                 "[What is aridity index?](https://en.wikipedia.org/wiki/Aridity_index) (We use Precipitation / PET)"
             )
-
+            st.markdown(
+                "How is annual change rate calculated? [Theil-Sen estimator](https://en.wikipedia.org/wiki/Theil%E2%80%93Sen_estimator)"
+            )
         st.markdown(
             """
             Data source: [CRU TS v4.08](https://crudata.uea.ac.uk/cru/data/hrg/), [GMTED2000](https://www.usgs.gov/centers/eros/science/usgs-eros-archive-digital-elevation-global-multi-resolution-terrain-elevation)
