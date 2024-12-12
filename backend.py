@@ -113,7 +113,7 @@ def calc_variables(data: np.ndarray) -> np.ndarray:
 
 
 # 只用于change rate绘图
-def prepare_change_rate(
+def calc_change_rate(
     variable_file: h5py.File,
     indices: np.ndarray,
     elev: np.ndarray,
@@ -633,7 +633,10 @@ def create_variable_chart(
 
     fig.add_trace(
         go.Scatter(
-            x=x, y=y, mode="lines" if mov_avg else "lines+markers", showlegend=False
+            x=x,
+            y=y,
+            mode="lines" if mov_avg else "lines+markers",
+            showlegend=False,
         )
     )
     fig.update_layout(
@@ -656,7 +659,9 @@ def create_variable_chart(
             gridcolor="lightgray",
         ),
         yaxis=dict(
-            title=map_type if location else "", autorange=True, gridcolor="lightgray"
+            title=map_type if location else "",
+            autorange=True,
+            gridcolor="lightgray",
         ),
         plot_bgcolor="white",
         showlegend=False,

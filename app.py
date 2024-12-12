@@ -5,7 +5,7 @@ from backend import (
     ClimateDataset,
     get_average,
     create_climate_chart,
-    prepare_change_rate,
+    calc_change_rate,
     search_location,
     create_variable_chart,
     MAP_TYPE_INDICES,
@@ -163,6 +163,13 @@ def load_resources() -> tuple[h5py.File, h5py.File, np.ndarray, np.ndarray, h5py
     elev = data_file.get("elev")[:]
     variable_file = h5py.File("dataset/climate_variables.h5", "r", swmr=True)
     return data_file, weight_file, indices, elev, variable_file
+
+
+@st.cache_resource
+def load_default_data(
+    _data_file: h5py.File, _indices: np.ndarray, _elev: np.ndarray, _network: Network
+) -> ClimateDataset:
+    return calc_climate_normals(90, 30, _data_file, _indices, _elev, _network)
 
 
 def calc_climate_normals(
@@ -357,6 +364,7 @@ if __name__ == "__main__":
 
     data_file, weight_file, indices, elev, variable_file = load_resources()
     network = get_network(weight_file)
+    default_data = load_default_data(data_file, indices, elev, network)
     simple_classifier = get_simple_classifier(weight_file)
     detailed_classifier = get_detailed_classifier(weight_file)
 
@@ -485,7 +493,6 @@ if __name__ == "__main__":
                                 st.session_state["fig"],
                                 list(st.session_state["selected_points"].keys()),
                             )
-                            st.rerun()
                         else:
                             st.toast("At most 3 locations could be displayed")
                     # else:
@@ -545,7 +552,6 @@ if __name__ == "__main__":
                     st.session_state["fig"],
                     list(st.session_state["selected_points"].keys()),
                 )
-                st.rerun()
 
         # 在表单之后添加额外信息
         st.markdown("---")
@@ -590,10 +596,9 @@ if __name__ == "__main__":
             st.session_state["year_range"][1] - st.session_state["year_range"][0] + 1
         )
 
-        if (
-            st.session_state["year_range_changed"]
-            or st.session_state["climate_data"] is None
-        ):
+        if st.session_state["climate_data"] is None:
+            st.session_state["climate_data"] = default_data
+        elif st.session_state["year_range_changed"]:
             with st.spinner("Calculating... (may take one minute)"):
                 st.session_state["climate_data"] = calc_climate_normals(
                     start_year_, years, data_file, indices, elev, network
@@ -627,7 +632,7 @@ if __name__ == "__main__":
                     )
                 case _:
                     if st.session_state["change_rate"]:
-                        df = prepare_change_rate(
+                        df = calc_change_rate(
                             variable_file,
                             indices,
                             elev,
