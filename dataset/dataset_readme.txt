@@ -1,6 +1,6 @@
 MD5 checksum for climate_data_land.h5: 4e4bd9db7d6042041f8b2377d0302ff3
 
-The hdf5 file contains 7 datasets with 'lzf' compression
+The hdf5 file contains 7 datasets with gzip compression
 
 'indices' - shape (66501, 2) - latitude, longitude for all land pixels
 'elev' - shape (66501, ) - average elevation (in metre) for each land pixel
@@ -17,7 +17,7 @@ Temperatures are in Celcius, precipitation and PET are in millimeters
 
 MD5 checksum for climate_variables.h5: 08807fe7c0730d81fbfceee48ffca85e
 
-The hdf5 file contains 1 dataset with 'lzf' compression
+The hdf5 file contains 1 dataset with gzip compression
 
 'res' - shape (66502, 123, 10)
 res[-1, :, :] is the global average
