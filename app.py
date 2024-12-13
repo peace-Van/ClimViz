@@ -309,7 +309,7 @@ def update_selected_points(fig, points_key: list[tuple[str, int]]):
 
 
 if __name__ == "__main__":
-    st.set_page_config(layout="wide", page_title="World Climate Explorer")
+    st.set_page_config(layout="wide", page_title="ClimViz - World Climate Explorer")
     # st.logo("icon.png")
     # 注入自定义 CSS 来调整顶部间距
     st.markdown(
@@ -324,7 +324,7 @@ if __name__ == "__main__":
         unsafe_allow_html=True,
     )
     # 设置页面标题
-    st.title("World Climate Explorer")
+    st.title("ClimViz - World Climate Explorer")
 
     if "fig" not in st.session_state:
         st.session_state["fig"] = None
@@ -582,6 +582,7 @@ if __name__ == "__main__":
         st.markdown(
             """
             Data source: [CRU TS v4.08](https://crudata.uea.ac.uk/cru/data/hrg/), [GMTED2000](https://www.usgs.gov/centers/eros/science/usgs-eros-archive-digital-elevation-global-multi-resolution-terrain-elevation)
+            v0.1.0
             """
         )
 
