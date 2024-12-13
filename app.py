@@ -582,7 +582,6 @@ if __name__ == "__main__":
         st.markdown(
             """
             Data source: [CRU TS v4.08](https://crudata.uea.ac.uk/cru/data/hrg/), [GMTED2000](https://www.usgs.gov/centers/eros/science/usgs-eros-archive-digital-elevation-global-multi-resolution-terrain-elevation)
-            v0.1.0
             """
         )
 
