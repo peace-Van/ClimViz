@@ -14,6 +14,7 @@ from backend import (
 import h5py
 from climate_classification import *
 from DLModel import Network
+import gc
 
 
 MAP_TYPES = {
@@ -320,6 +321,22 @@ if __name__ == "__main__":
                 padding-bottom: 0rem;
             }
         </style>
+        <script>
+            window.onerror = function(msg, url, lineNo, columnNo, error) {
+                // 发送错误信息到 Streamlit
+                window.parent.postMessage({
+                    type: 'streamlit:error',
+                    message: {
+                        message: msg,
+                        stack: error ? error.stack : '',
+                        url: url,
+                        line: lineNo,
+                        column: columnNo        
+                    }
+                }, '*');
+                return false;
+            };
+        </script>
     """,
         unsafe_allow_html=True,
     )
@@ -368,7 +385,7 @@ if __name__ == "__main__":
     simple_classifier = get_simple_classifier(weight_file)
     detailed_classifier = get_detailed_classifier(weight_file)
 
-    # gc.collect()
+    gc.collect()
 
     with st.sidebar:
         # 侧边栏控件
@@ -596,7 +613,7 @@ if __name__ == "__main__":
             st.session_state["year_range"][1] - st.session_state["year_range"][0] + 1
         )
 
-        if st.session_state["climate_data"] is None:
+        if start_year_ == 90 and years == 30:
             st.session_state["climate_data"] = default_data
         elif st.session_state["year_range_changed"]:
             with st.spinner("Calculating... (may take one minute)"):
@@ -604,7 +621,7 @@ if __name__ == "__main__":
                     start_year_, years, data_file, indices, elev, network
                 )
                 st.session_state["year_range_changed"] = False
-        # gc.collect()
+        gc.collect()
 
         with st.spinner("Preparing map data..."):
             match st.session_state["map_type"]:
@@ -646,7 +663,7 @@ if __name__ == "__main__":
                             st.session_state["map_type"], unit=st.session_state["unit"]
                         )
 
-            # gc.collect()
+        gc.collect()
 
         if st.session_state["cat_val"] == "Classification":
             match st.session_state["map_type"]:
@@ -764,7 +781,7 @@ if __name__ == "__main__":
             uirevision=True,
         )
         st.session_state["fig"] = fig
-        # gc.collect()
+        gc.collect()
 
     if st.session_state["fig"] is not None:
         clicked_point = st.plotly_chart(
@@ -823,70 +840,76 @@ if __name__ == "__main__":
                         subtitle += f", value: {customdata[1]:.2f}"
 
                 with cols[i]:
-                    col1, col2, col3, col4 = st.columns(4)
-                    with col1:
-                        auto_scale = st.checkbox(
-                            "Auto scale axes",
-                            value=st.session_state["change_rate"],
-                            key=f"auto_scale_{i}",
-                            disabled=st.session_state["change_rate"],
-                        )
-                    with col2:
-                        local_lang = st.checkbox(
-                            "Local language", value=False, key=f"local_lang_{i}"
-                        )
-                    with col3:
-                        july_first = st.checkbox(
-                            "July first",
-                            value=False,
-                            key=f"july_first_{i}",
-                            disabled=st.session_state["change_rate"],
-                        )
+                    with st.empty():
+                        with st.container():
+                            col1, col2, col3, col4 = st.columns(4)
+                            with col1:
+                                auto_scale = st.checkbox(
+                                    "Auto scale axes",
+                                    value=st.session_state["change_rate"],
+                                    key=f"auto_scale_{i}",
+                                    disabled=st.session_state["change_rate"],
+                                )
+                            with col2:
+                                local_lang = st.checkbox(
+                                    "Local language", value=False, key=f"local_lang_{i}"
+                                )
+                            with col3:
+                                july_first = st.checkbox(
+                                    "July first",
+                                    value=False,
+                                    key=f"july_first_{i}",
+                                    disabled=st.session_state["change_rate"],
+                                )
 
-                    if not st.session_state["change_rate"]:
-                        fig = create_climate_chart(
-                            st.session_state["climate_data"][point_location],
-                            point_location,
-                            subtitle,
-                            local_lang,
-                            july_first,
-                            st.session_state["unit"],
-                            auto_scale,
-                        )
-                    else:
-                        x = [i for i in range(1901, LATEST_YEAR + 1)]
-                        idx = np.where(
-                            (indices[:, 0] == point_location[0])
-                            & (indices[:, 1] == point_location[1])
-                        )[0]
-                        y = variable_file.get("variables")[
-                            idx, :, MAP_TYPE_INDICES[st.session_state["map_type"]]
-                        ].squeeze()
-                        mov_avg = st.toggle(
-                            "30-year moving average", value=True, key=f"mov_avg_{i}"
-                        )
-                        fig = create_variable_chart(
-                            y,
-                            point_location,
-                            subtitle,
-                            st.session_state["map_type"],
-                            st.session_state["unit"],
-                            local_lang,
-                            mov_avg=mov_avg,
-                        )
+                            if not st.session_state["change_rate"]:
+                                fig = create_climate_chart(
+                                    st.session_state["climate_data"][point_location],
+                                    point_location,
+                                    subtitle,
+                                    local_lang,
+                                    july_first,
+                                    st.session_state["unit"],
+                                    auto_scale,
+                                )
+                            else:
+                                x = [i for i in range(1901, LATEST_YEAR + 1)]
+                                idx = np.where(
+                                    (indices[:, 0] == point_location[0])
+                                    & (indices[:, 1] == point_location[1])
+                                )[0]
+                                y = variable_file.get("variables")[
+                                    idx,
+                                    :,
+                                    MAP_TYPE_INDICES[st.session_state["map_type"]],
+                                ].squeeze()
+                                mov_avg = st.toggle(
+                                    "30-year moving average",
+                                    value=True,
+                                    key=f"mov_avg_{i}",
+                                )
+                                fig = create_variable_chart(
+                                    y,
+                                    point_location,
+                                    subtitle,
+                                    st.session_state["map_type"],
+                                    st.session_state["unit"],
+                                    local_lang,
+                                    mov_avg=mov_avg,
+                                )
 
-                    st.plotly_chart(fig, use_container_width=True)
+                            st.plotly_chart(fig, use_container_width=True)
 
-                    # gc.collect()
+                            gc.collect()
 
-                    with col4:
-                        if st.button(
-                            "Clear",
-                            key=f"clear_{i}",
-                            type="primary",
-                            on_click=clear_text_location,
-                        ):
-                            points_to_remove.append(point_key)
+                            with col4:
+                                if st.button(
+                                    "Clear",
+                                    key=f"clear_{i}",
+                                    type="primary",
+                                    on_click=clear_text_location,
+                                ):
+                                    points_to_remove.append(point_key)
 
                 if i == 2:
                     break
@@ -909,55 +932,69 @@ if __name__ == "__main__":
             match st.session_state["map_type"]:
                 case "Köppen-Geiger Classification" | "Trewartha Classification":
                     with cols[0]:
-                        # 绘制全球平均'Annual Mean Temperature'的折线图
-                        y = global_avg[:, MAP_TYPE_INDICES["Annual Mean Temperature"]]
-                        mov_avg = st.toggle(
-                            "30-year moving average",
-                            value=True,
-                            key=f"mov_avg_global_0",
-                        )
-                        fig = create_variable_chart(
-                            y,
-                            None,
-                            "",
-                            "Annual Mean Temperature",
-                            st.session_state["unit"],
-                            False,
-                            mov_avg=mov_avg,
-                        )
-                        st.plotly_chart(fig, use_container_width=True)
+                        with st.empty():
+                            with st.container():
+                                # 绘制全球平均'Annual Mean Temperature'的折线图
+                                y = global_avg[
+                                    :, MAP_TYPE_INDICES["Annual Mean Temperature"]
+                                ]
+                                mov_avg = st.toggle(
+                                    "30-year moving average",
+                                    value=True,
+                                    key="mov_avg_global_0",
+                                )
+                                fig = create_variable_chart(
+                                    y,
+                                    None,
+                                    "",
+                                    "Annual Mean Temperature",
+                                    st.session_state["unit"],
+                                    False,
+                                    mov_avg=mov_avg,
+                                )
+                                st.plotly_chart(fig, use_container_width=True)
                     with cols[1]:
-                        # 绘制全球平均'Annual Total Precipitation'的折线图
-                        y = global_avg[
-                            :, MAP_TYPE_INDICES["Annual Total Precipitation"]
-                        ]
-                        mov_avg = st.toggle(
-                            "30-year moving average",
-                            value=True,
-                            key=f"mov_avg_global_1",
-                        )
-                        fig = create_variable_chart(
-                            y,
-                            None,
-                            "",
-                            "Annual Total Precipitation",
-                            st.session_state["unit"],
-                            False,
-                            mov_avg=mov_avg,
-                        )
-                        st.plotly_chart(fig, use_container_width=True)
+                        with st.empty():
+                            with st.container():
+                                # 绘制全球平均'Annual Total Precipitation'的折线图
+                                y = global_avg[
+                                    :, MAP_TYPE_INDICES["Annual Total Precipitation"]
+                                ]
+                                mov_avg = st.toggle(
+                                    "30-year moving average",
+                                    value=True,
+                                    key="mov_avg_global_1",
+                                )
+                                fig = create_variable_chart(
+                                    y,
+                                    None,
+                                    "",
+                                    "Annual Total Precipitation",
+                                    st.session_state["unit"],
+                                    False,
+                                    mov_avg=mov_avg,
+                                )
+                                st.plotly_chart(fig, use_container_width=True)
                     with cols[2]:
-                        # 绘制全球平均'Aridity Index'的折线图
-                        y = global_avg[:, MAP_TYPE_INDICES["Aridity Index"]]
-                        mov_avg = st.toggle(
-                            "30-year moving average",
-                            value=True,
-                            key=f"mov_avg_global_2",
-                        )
-                        fig = create_variable_chart(
-                            y, None, "", "Aridity Index", False, False, mov_avg=mov_avg
-                        )
-                        st.plotly_chart(fig, use_container_width=True)
+                        with st.empty():
+                            with st.container():
+                                # 绘制全球平均'Aridity Index'的折线图
+                                y = global_avg[:, MAP_TYPE_INDICES["Aridity Index"]]
+                                mov_avg = st.toggle(
+                                    "30-year moving average",
+                                    value=True,
+                                    key="mov_avg_global_2",
+                                )
+                                fig = create_variable_chart(
+                                    y,
+                                    None,
+                                    "",
+                                    "Aridity Index",
+                                    False,
+                                    False,
+                                    mov_avg=mov_avg,
+                                )
+                                st.plotly_chart(fig, use_container_width=True)
 
                 case (
                     "Data-driven Ecological - Basic"
@@ -965,60 +1002,86 @@ if __name__ == "__main__":
                     | "Predicted Land Cover"
                 ):
                     with cols[0]:
-                        # 绘制全球平均'Cryohumidity'的折线图
-                        y = global_avg[:, MAP_TYPE_INDICES["Cryohumidity"]]
-                        mov_avg = st.toggle(
-                            "30-year moving average",
-                            value=True,
-                            key=f"mov_avg_global_0",
-                        )
-                        fig = create_variable_chart(
-                            y, None, "", "Cryohumidity", False, False, mov_avg=mov_avg
-                        )
-                        st.plotly_chart(fig, use_container_width=True)
+                        with st.empty():
+                            with st.container():
+                                # 绘制全球平均'Cryohumidity'的折线图
+                                y = global_avg[:, MAP_TYPE_INDICES["Cryohumidity"]]
+                                mov_avg = st.toggle(
+                                    "30-year moving average",
+                                    value=True,
+                                    key="mov_avg_global_0",
+                                )
+                                fig = create_variable_chart(
+                                    y,
+                                    None,
+                                    "",
+                                    "Cryohumidity",
+                                    False,
+                                    False,
+                                    mov_avg=mov_avg,
+                                )
+                                st.plotly_chart(fig, use_container_width=True)
                     with cols[1]:
-                        # 绘制全球平均'Continentality'的折线图
-                        y = global_avg[:, MAP_TYPE_INDICES["Continentality"]]
-                        mov_avg = st.toggle(
-                            "30-year moving average",
-                            value=True,
-                            key=f"mov_avg_global_1",
-                        )
-                        fig = create_variable_chart(
-                            y, None, "", "Continentality", False, False, mov_avg=mov_avg
-                        )
-                        st.plotly_chart(fig, use_container_width=True)
+                        with st.empty():
+                            with st.container():
+                                # 绘制全球平均'Continentality'的折线图
+                                y = global_avg[:, MAP_TYPE_INDICES["Continentality"]]
+                                mov_avg = st.toggle(
+                                    "30-year moving average",
+                                    value=True,
+                                    key="mov_avg_global_1",
+                                )
+                                fig = create_variable_chart(
+                                    y,
+                                    None,
+                                    "",
+                                    "Continentality",
+                                    False,
+                                    False,
+                                    mov_avg=mov_avg,
+                                )
+                                st.plotly_chart(fig, use_container_width=True)
                     with cols[2]:
-                        # 绘制全球平均'Seasonality'的折线图
-                        y = global_avg[:, MAP_TYPE_INDICES["Seasonality"]]
-                        mov_avg = st.toggle(
-                            "30-year moving average",
-                            value=True,
-                            key=f"mov_avg_global_2",
-                        )
-                        fig = create_variable_chart(
-                            y, None, "", "Seasonality", False, False, mov_avg=mov_avg
-                        )
-                        st.plotly_chart(fig, use_container_width=True)
+                        with st.empty():
+                            with st.container():
+                                # 绘制全球平均'Seasonality'的折线图
+                                y = global_avg[:, MAP_TYPE_INDICES["Seasonality"]]
+                                mov_avg = st.toggle(
+                                    "30-year moving average",
+                                    value=True,
+                                    key="mov_avg_global_2",
+                                )
+                                fig = create_variable_chart(
+                                    y,
+                                    None,
+                                    "",
+                                    "Seasonality",
+                                    False,
+                                    False,
+                                    mov_avg=mov_avg,
+                                )
+                                st.plotly_chart(fig, use_container_width=True)
 
                 case _:
                     with cols[1]:
-                        # 绘制全球平均'选中变量'的折线图
-                        y = global_avg[
-                            :, MAP_TYPE_INDICES[st.session_state["map_type"]]
-                        ]
-                        mov_avg = st.toggle(
-                            "30-year moving average",
-                            value=True,
-                            key=f"mov_avg_global_1",
-                        )
-                        fig = create_variable_chart(
-                            y,
-                            None,
-                            "",
-                            st.session_state["map_type"],
-                            st.session_state["unit"],
-                            False,
-                            mov_avg=mov_avg,
-                        )
-                        st.plotly_chart(fig, use_container_width=True)
+                        with st.empty():
+                            with st.container():
+                                # 绘制全球平均'选中变量'的折线图
+                                y = global_avg[
+                                    :, MAP_TYPE_INDICES[st.session_state["map_type"]]
+                                ]
+                                mov_avg = st.toggle(
+                                    "30-year moving average",
+                                    value=True,
+                                    key="mov_avg_global_1",
+                                )
+                                fig = create_variable_chart(
+                                    y,
+                                    None,
+                                    "",
+                                    st.session_state["map_type"],
+                                    st.session_state["unit"],
+                                    False,
+                                    mov_avg=mov_avg,
+                                )
+                                st.plotly_chart(fig, use_container_width=True)
