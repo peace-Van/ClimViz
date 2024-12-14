@@ -241,6 +241,7 @@ class KoppenClassification:
         cd_threshold: threshold for C and D classes, usually -3 or 0
         kh_mode: classification mode for B classes ('coldest_month' coldest month < cd_threshold is k, otherwise h, or 'mean_temp' mean temperature < 18 is k, otherwise h)
         """
+        eps = 1e-6
         # Sort by temperature
         sorted_indices = np.argsort(climate_data[0, :])
         t_monthly = climate_data[:, sorted_indices]
@@ -248,7 +249,7 @@ class KoppenClassification:
         # Calculate basic climate indicators
         total_pr = np.sum(t_monthly[1, :])
         pr_percent = (
-            np.sum(t_monthly[1, 5:12]) / total_pr
+            np.sum(t_monthly[1, 5:12]) / (total_pr + eps)
         )  # Summer half-year precipitation ratio
         mean_temp = np.mean(t_monthly[0, :])
 
@@ -381,6 +382,7 @@ class TrewarthaClassification:
 
     @staticmethod
     def classify(climate_data: np.ndarray) -> str:
+        eps = 1e-6
         # Sort by temperature
         sorted_indices = np.argsort(climate_data[0, :])
         t_monthly = climate_data[:, sorted_indices]
@@ -388,7 +390,7 @@ class TrewarthaClassification:
         # Calculate basic climate indicators
         total_pr = np.sum(t_monthly[1, :])
         pr_percent = (
-            np.sum(t_monthly[1, 0:6]) / total_pr
+            np.sum(t_monthly[1, 0:6]) / (total_pr + eps)
         )  # Winter half-year precipitation ratio
         mean_temp = np.mean(t_monthly[0, :])
 
