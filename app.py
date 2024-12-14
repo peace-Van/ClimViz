@@ -8,7 +8,7 @@ from backend import (
     calc_change_rate,
     search_location,
     create_variable_chart,
-    MAP_TYPE_INDICES,
+    VARIABLE_TYPE_INDICES,
     LATEST_YEAR,
 )
 import h5py
@@ -236,27 +236,6 @@ def sync_number_input():
         st.session_state["year_range_changed"] = True
 
 
-def sync_cat_val():
-    st.session_state["cat_val_index"] = (
-        0 if st.session_state["cat_val"] == "Classification" else 1
-    )
-    st.session_state["settings_changed"] = True
-
-
-def sync_koppen_cd_mode():
-    st.session_state["koppen_cd_mode_index"] = (
-        0 if st.session_state["koppen_cd_mode"] == "0&deg;C" else 1
-    )
-    st.session_state["settings_changed"] = True
-
-
-def sync_koppen_kh_mode():
-    st.session_state["koppen_kh_mode_index"] = (
-        0 if st.session_state["koppen_kh_mode"] == "annual mean temp 18&deg;C" else 1
-    )
-    st.session_state["settings_changed"] = True
-
-
 def sync_settings_changed():
     st.session_state["settings_changed"] = True
 
@@ -346,18 +325,6 @@ if __name__ == "__main__":
     if "fig" not in st.session_state:
         st.session_state["fig"] = None
 
-    if "cat_val_index" not in st.session_state:
-        st.session_state["cat_val_index"] = 0
-
-    if "map_type_index" not in st.session_state:
-        st.session_state["map_type_index"] = 0
-
-    if "koppen_cd_mode_index" not in st.session_state:
-        st.session_state["koppen_cd_mode_index"] = 0
-
-    if "koppen_kh_mode_index" not in st.session_state:
-        st.session_state["koppen_kh_mode_index"] = 0
-
     if "year_range" not in st.session_state:
         st.session_state["year_range"] = (1991, 2020)
 
@@ -393,11 +360,11 @@ if __name__ == "__main__":
         st.radio(
             "zzz",
             ["Classification", "Variable"],
-            index=st.session_state["cat_val_index"],
+            index=0,
             horizontal=True,
             label_visibility="collapsed",
             key="cat_val",
-            on_change=sync_cat_val,
+            on_change=sync_settings_changed,
         )
         st.selectbox(
             "zzz",
@@ -425,9 +392,9 @@ if __name__ == "__main__":
                 "Temperature threshold between **C** and **D**",
                 ["0&deg;C", "-3&deg;C"],
                 key="koppen_cd_mode",
-                index=st.session_state["koppen_cd_mode_index"],
+                index=0,
                 horizontal=True,
-                on_change=sync_koppen_cd_mode,
+                on_change=sync_settings_changed,
             )
             st.radio(
                 "Criterion between **Bh** and **Bk**",
@@ -436,9 +403,9 @@ if __name__ == "__main__":
                     "coldest month %s" % st.session_state["koppen_cd_mode"],
                 ],
                 key="koppen_kh_mode",
-                index=st.session_state["koppen_kh_mode_index"],
+                index=0,
                 horizontal=True,
-                on_change=sync_koppen_kh_mode,
+                on_change=sync_settings_changed,
             )
             st.markdown("---")  # 添加分隔线
 
@@ -624,44 +591,47 @@ if __name__ == "__main__":
         gc.collect()
 
         with st.spinner("Preparing map data..."):
-            match st.session_state["map_type"]:
-                case "Köppen-Geiger Classification":
-                    df = st.session_state["climate_data"].prepare_map_data(
-                        st.session_state["map_type"],
-                        st.session_state["koppen_cd_mode"],
-                        st.session_state["koppen_kh_mode"],
-                    )
-                case "Data-driven Ecological - Basic":
-                    df = st.session_state["climate_data"].prepare_map_data(
-                        st.session_state["map_type"], dl_classifier=simple_classifier
-                    )
-                case "Data-driven Ecological - Advanced":
-                    df = st.session_state["climate_data"].prepare_map_data(
-                        st.session_state["map_type"], dl_classifier=detailed_classifier
-                    )
-                case "Predicted Land Cover":
-                    df = st.session_state["climate_data"].prepare_map_data(
-                        st.session_state["map_type"], veg_names=VEG_MAP
-                    )
-                case "Trewartha Classification":
-                    df = st.session_state["climate_data"].prepare_map_data(
-                        st.session_state["map_type"]
-                    )
-                case _:
-                    if st.session_state["change_rate"]:
-                        df = calc_change_rate(
-                            variable_file,
-                            indices,
-                            elev,
-                            st.session_state["map_type"],
-                            start_year_,
-                            years,
-                            unit=st.session_state["unit"],
-                        )
-                    else:
+            if st.session_state["cat_val"] == "Classification":
+                match st.session_state["map_type"]:
+                    case "Köppen-Geiger Classification":
                         df = st.session_state["climate_data"].prepare_map_data(
-                            st.session_state["map_type"], unit=st.session_state["unit"]
+                            st.session_state["map_type"],
+                            st.session_state["koppen_cd_mode"],
+                            st.session_state["koppen_kh_mode"],
                         )
+                    case "Data-driven Ecological - Basic":
+                        df = st.session_state["climate_data"].prepare_map_data(
+                            st.session_state["map_type"],
+                            dl_classifier=simple_classifier,
+                        )
+                    case "Data-driven Ecological - Advanced":
+                        df = st.session_state["climate_data"].prepare_map_data(
+                            st.session_state["map_type"],
+                            dl_classifier=detailed_classifier,
+                        )
+                    case "Predicted Land Cover":
+                        df = st.session_state["climate_data"].prepare_map_data(
+                            st.session_state["map_type"], veg_names=VEG_MAP
+                        )
+                    case "Trewartha Classification":
+                        df = st.session_state["climate_data"].prepare_map_data(
+                            st.session_state["map_type"]
+                        )
+            else:
+                if st.session_state["change_rate"]:
+                    df = calc_change_rate(
+                        variable_file,
+                        indices,
+                        elev,
+                        st.session_state["map_type"],
+                        start_year_,
+                        years,
+                        unit=st.session_state["unit"],
+                    )
+                else:
+                    df = st.session_state["climate_data"].prepare_map_data(
+                        st.session_state["map_type"], unit=st.session_state["unit"]
+                    )
 
         gc.collect()
 
@@ -881,7 +851,7 @@ if __name__ == "__main__":
                                 y = variable_file.get("variables")[
                                     idx,
                                     :,
-                                    MAP_TYPE_INDICES[st.session_state["map_type"]],
+                                    VARIABLE_TYPE_INDICES[st.session_state["map_type"]],
                                 ].squeeze()
                                 mov_avg = st.toggle(
                                     "30-year moving average",
@@ -936,7 +906,7 @@ if __name__ == "__main__":
                             with st.container():
                                 # 绘制全球平均'Annual Mean Temperature'的折线图
                                 y = global_avg[
-                                    :, MAP_TYPE_INDICES["Annual Mean Temperature"]
+                                    :, VARIABLE_TYPE_INDICES["Annual Mean Temperature"]
                                 ]
                                 mov_avg = st.toggle(
                                     "30-year moving average",
@@ -958,7 +928,8 @@ if __name__ == "__main__":
                             with st.container():
                                 # 绘制全球平均'Annual Total Precipitation'的折线图
                                 y = global_avg[
-                                    :, MAP_TYPE_INDICES["Annual Total Precipitation"]
+                                    :,
+                                    VARIABLE_TYPE_INDICES["Annual Total Precipitation"],
                                 ]
                                 mov_avg = st.toggle(
                                     "30-year moving average",
@@ -979,7 +950,9 @@ if __name__ == "__main__":
                         with st.empty():
                             with st.container():
                                 # 绘制全球平均'Aridity Index'的折线图
-                                y = global_avg[:, MAP_TYPE_INDICES["Aridity Index"]]
+                                y = global_avg[
+                                    :, VARIABLE_TYPE_INDICES["Aridity Index"]
+                                ]
                                 mov_avg = st.toggle(
                                     "30-year moving average",
                                     value=True,
@@ -1005,7 +978,7 @@ if __name__ == "__main__":
                         with st.empty():
                             with st.container():
                                 # 绘制全球平均'Cryohumidity'的折线图
-                                y = global_avg[:, MAP_TYPE_INDICES["Cryohumidity"]]
+                                y = global_avg[:, VARIABLE_TYPE_INDICES["Cryohumidity"]]
                                 mov_avg = st.toggle(
                                     "30-year moving average",
                                     value=True,
@@ -1025,7 +998,9 @@ if __name__ == "__main__":
                         with st.empty():
                             with st.container():
                                 # 绘制全球平均'Continentality'的折线图
-                                y = global_avg[:, MAP_TYPE_INDICES["Continentality"]]
+                                y = global_avg[
+                                    :, VARIABLE_TYPE_INDICES["Continentality"]
+                                ]
                                 mov_avg = st.toggle(
                                     "30-year moving average",
                                     value=True,
@@ -1045,7 +1020,7 @@ if __name__ == "__main__":
                         with st.empty():
                             with st.container():
                                 # 绘制全球平均'Seasonality'的折线图
-                                y = global_avg[:, MAP_TYPE_INDICES["Seasonality"]]
+                                y = global_avg[:, VARIABLE_TYPE_INDICES["Seasonality"]]
                                 mov_avg = st.toggle(
                                     "30-year moving average",
                                     value=True,
@@ -1068,7 +1043,8 @@ if __name__ == "__main__":
                             with st.container():
                                 # 绘制全球平均'选中变量'的折线图
                                 y = global_avg[
-                                    :, MAP_TYPE_INDICES[st.session_state["map_type"]]
+                                    :,
+                                    VARIABLE_TYPE_INDICES[st.session_state["map_type"]],
                                 ]
                                 mov_avg = st.toggle(
                                     "30-year moving average",

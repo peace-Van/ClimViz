@@ -10,6 +10,7 @@ import h5py
 from DLModel import Network
 from numba import njit
 
+
 LATEST_YEAR = 2023
 TEMP_RANGE = [
     [-25, 40],  # °C
@@ -27,7 +28,7 @@ PREC_TICKVALS = [
     [30, 90, 150, 210, 270, 330, 390],  # mm
     [1, 3, 5, 7, 9, 11, 13],
 ]  # inch
-MAP_TYPE_INDICES = {
+VARIABLE_TYPE_INDICES = {
     "Lowest Monthly Temperature": 0,
     "Highest Monthly Temperature": 1,
     "Highest Monthly Precipitation": 2,
@@ -117,7 +118,7 @@ def calc_change_rate(
     variable_file: h5py.File,
     indices: np.ndarray,
     elev: np.ndarray,
-    map_type: str,
+    variable_type: str,
     yr: int,
     yrs: int,
     unit: bool = False,
@@ -125,7 +126,9 @@ def calc_change_rate(
     x = np.array([i for i in range(yr, yr + yrs)], dtype=np.float32)
     data = variable_file.get("variables")[:-1, yr : yr + yrs, :]
 
-    values = process_variables_trend(data, x, MAP_TYPE_INDICES[map_type], unit)
+    values = process_variables_trend(
+        data, x, VARIABLE_TYPE_INDICES[variable_type], unit
+    )
     lats, lons = zip(*indices)
 
     return pd.DataFrame({"lat": lats, "lon": lons, "value": values, "elev": elev})
