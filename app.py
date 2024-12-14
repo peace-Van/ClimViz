@@ -660,7 +660,7 @@ if __name__ == "__main__":
                 color="value",
                 color_discrete_map=cm,
                 hover_data={"elev": True, "value": True},
-                opacity=0.75,
+                opacity=0.8,
                 category_orders={"value": classes},
             )
 
@@ -696,7 +696,7 @@ if __name__ == "__main__":
                     st.session_state["change_rate"]
                 ][st.session_state["unit"]],
                 hover_data={"elev": True, "value": True},
-                opacity=0.75,
+                opacity=0.8,
             )
 
             fig.update_traces(
@@ -737,7 +737,10 @@ if __name__ == "__main__":
             lataxis_range=[-60, 90],  # 纬度范围
         )
 
-        fig.update_traces(marker=dict(size=5))
+        fig.update_traces(
+            marker=dict(size=5),
+            unselected=dict(marker=dict(opacity=0.2)),
+        )
 
         st.session_state["selected_points"] = update_points_dict(
             fig, list(st.session_state["selected_points"].values())
