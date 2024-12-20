@@ -491,7 +491,7 @@ if __name__ == "__main__":
         if st.session_state["settings_changed"]:
             st.info("Click Update Map to apply new settings")
 
-        st.toggle("Plot global trend", value=True, key="show_global_trend")
+        st.toggle("Plot global trend", value=True, key="show_global_trend", help="This only applies when no points are selected on the map")
         if st.session_state["map_type"] in [
             "Annual Mean Temperature",
             "Annual Total Precipitation",
