@@ -817,18 +817,18 @@ if __name__ == "__main__":
                         with st.container():
                             col1, col2, col3, col4 = st.columns(4)
                             with col1:
-                                auto_scale = st.checkbox(
+                                st.checkbox(
                                     "Auto scale axes",
                                     value=st.session_state["change_rate"],
                                     key=f"auto_scale_{i}",
                                     disabled=st.session_state["change_rate"],
                                 )
                             with col2:
-                                local_lang = st.checkbox(
+                                st.checkbox(
                                     "Local language", value=False, key=f"local_lang_{i}"
                                 )
                             with col3:
-                                july_first = st.checkbox(
+                                st.checkbox(
                                     "July first",
                                     value=False,
                                     key=f"july_first_{i}",
@@ -840,10 +840,10 @@ if __name__ == "__main__":
                                     st.session_state["climate_data"][point_location],
                                     point_location,
                                     subtitle,
-                                    local_lang,
-                                    july_first,
+                                    st.session_state[f"local_lang_{i}"],
+                                    st.session_state[f"july_first_{i}"],
                                     st.session_state["unit"],
-                                    auto_scale,
+                                    st.session_state[f"auto_scale_{i}"],
                                 )
                             else:
                                 x = [i for i in range(1901, LATEST_YEAR + 1)]
@@ -856,7 +856,7 @@ if __name__ == "__main__":
                                     :,
                                     VARIABLE_TYPE_INDICES[st.session_state["map_type"]],
                                 ].squeeze()
-                                mov_avg = st.toggle(
+                                st.toggle(
                                     "30-year moving average",
                                     value=True,
                                     key=f"mov_avg_{i}",
@@ -867,8 +867,8 @@ if __name__ == "__main__":
                                     subtitle,
                                     st.session_state["map_type"],
                                     st.session_state["unit"],
-                                    local_lang,
-                                    mov_avg=mov_avg,
+                                    st.session_state[f"local_lang_{i}"],
+                                    mov_avg=st.session_state[f"mov_avg_{i}"],
                                 )
 
                             st.plotly_chart(fig, use_container_width=True)
@@ -911,7 +911,7 @@ if __name__ == "__main__":
                                 y = global_avg[
                                     :, VARIABLE_TYPE_INDICES["Annual Mean Temperature"]
                                 ]
-                                mov_avg = st.toggle(
+                                st.toggle(
                                     "30-year moving average",
                                     value=True,
                                     key="mov_avg_global_0",
@@ -923,7 +923,7 @@ if __name__ == "__main__":
                                     "Annual Mean Temperature",
                                     st.session_state["unit"],
                                     False,
-                                    mov_avg=mov_avg,
+                                    mov_avg=st.session_state["mov_avg_global_0"],
                                 )
                                 st.plotly_chart(fig, use_container_width=True)
                     with cols[1]:
@@ -934,7 +934,7 @@ if __name__ == "__main__":
                                     :,
                                     VARIABLE_TYPE_INDICES["Annual Total Precipitation"],
                                 ]
-                                mov_avg = st.toggle(
+                                st.toggle(
                                     "30-year moving average",
                                     value=True,
                                     key="mov_avg_global_1",
@@ -946,7 +946,7 @@ if __name__ == "__main__":
                                     "Annual Total Precipitation",
                                     st.session_state["unit"],
                                     False,
-                                    mov_avg=mov_avg,
+                                    mov_avg=st.session_state["mov_avg_global_1"],
                                 )
                                 st.plotly_chart(fig, use_container_width=True)
                     with cols[2]:
@@ -956,7 +956,7 @@ if __name__ == "__main__":
                                 y = global_avg[
                                     :, VARIABLE_TYPE_INDICES["Aridity Index"]
                                 ]
-                                mov_avg = st.toggle(
+                                st.toggle(
                                     "30-year moving average",
                                     value=True,
                                     key="mov_avg_global_2",
@@ -968,7 +968,7 @@ if __name__ == "__main__":
                                     "Aridity Index",
                                     False,
                                     False,
-                                    mov_avg=mov_avg,
+                                    mov_avg=st.session_state["mov_avg_global_2"],
                                 )
                                 st.plotly_chart(fig, use_container_width=True)
 
@@ -982,7 +982,7 @@ if __name__ == "__main__":
                             with st.container():
                                 # 绘制全球平均'Cryohumidity'的折线图
                                 y = global_avg[:, VARIABLE_TYPE_INDICES["Cryohumidity"]]
-                                mov_avg = st.toggle(
+                                st.toggle(
                                     "30-year moving average",
                                     value=True,
                                     key="mov_avg_global_0",
@@ -994,7 +994,7 @@ if __name__ == "__main__":
                                     "Cryohumidity",
                                     False,
                                     False,
-                                    mov_avg=mov_avg,
+                                    mov_avg=st.session_state["mov_avg_global_0"],
                                 )
                                 st.plotly_chart(fig, use_container_width=True)
                     with cols[1]:
@@ -1016,7 +1016,7 @@ if __name__ == "__main__":
                                     "Continentality",
                                     False,
                                     False,
-                                    mov_avg=mov_avg,
+                                    mov_avg=st.session_state["mov_avg_global_1"],
                                 )
                                 st.plotly_chart(fig, use_container_width=True)
                     with cols[2]:
@@ -1036,7 +1036,7 @@ if __name__ == "__main__":
                                     "Seasonality",
                                     False,
                                     False,
-                                    mov_avg=mov_avg,
+                                    mov_avg=st.session_state["mov_avg_global_2"],
                                 )
                                 st.plotly_chart(fig, use_container_width=True)
 
@@ -1049,7 +1049,7 @@ if __name__ == "__main__":
                                     :,
                                     VARIABLE_TYPE_INDICES[st.session_state["map_type"]],
                                 ]
-                                mov_avg = st.toggle(
+                                st.toggle(
                                     "30-year moving average",
                                     value=True,
                                     key="mov_avg_global_1",
@@ -1061,6 +1061,6 @@ if __name__ == "__main__":
                                     st.session_state["map_type"],
                                     st.session_state["unit"],
                                     False,
-                                    mov_avg=mov_avg,
+                                    mov_avg=st.session_state["mov_avg_global_1"],
                                 )
                                 st.plotly_chart(fig, use_container_width=True)
