@@ -146,11 +146,11 @@ class ClimateData:
 
 @dataclass
 class ClimateDataset:
-    __slots__ = ["data", "pca_features", "veg_indices", "variables"]
+    __slots__ = ["data", "pca_features", "veg_probabilities", "variables"]
 
     data: dict[tuple[float, float], ClimateData]
     pca_features: np.ndarray
-    veg_indices: np.ndarray
+    veg_probabilities: np.ndarray
     variables: np.ndarray
 
     def __getitem__(self, idx: tuple[float, float]) -> ClimateData:
@@ -165,7 +165,7 @@ class ClimateDataset:
         self.pca_features = np.zeros(
             (n_samples, dl_network.pca_components), dtype=np.float32
         )
-        self.veg_indices = np.zeros(n_samples, dtype=np.int32)
+        self.veg_probabilities = np.zeros((n_samples, 14), dtype=np.float32)
 
         for i in range(0, n_samples, batch_size):
             batch = np.array(
@@ -177,7 +177,7 @@ class ClimateDataset:
             )
             (
                 self.pca_features[i : i + batch_size],
-                self.veg_indices[i : i + batch_size],
+                self.veg_probabilities[i : i + batch_size],
             ) = dl_network(batch)
 
     def prepare_variables(self) -> None:
@@ -193,7 +193,7 @@ class ClimateDataset:
         return [TrewarthaClassification.classify(v.ori) for v in self.data.values()]
 
     def get_veg(self, veg_names: list[str]) -> list[str]:
-        return [veg_names[i] for i in self.veg_indices]
+        return [veg_names[i] for i in np.argmax(self.veg_probabilities, axis=1)]
 
     def get_dl(self, dl_classifier: DLClassification) -> list[str]:
         return dl_classifier.classify(self.pca_features)
@@ -334,7 +334,7 @@ def get_average(
     return ClimateDataset(
         data=res,
         pca_features=np.array([]),
-        veg_indices=np.array([]),
+        veg_probabilities=np.array([]),
         variables=np.array([]),
     )
 
@@ -669,4 +669,80 @@ def create_variable_chart(
         plot_bgcolor="white",
         showlegend=False,
     )
+    return fig
+
+
+def create_probability_chart(
+    probabilities: np.ndarray,
+    class_map: list[str],
+    color_map: dict[str, str],
+    location: tuple[float, float],
+    subtitle: str,
+    local_lang: bool,
+) -> go.Figure:
+    """
+    创建气候类型概率分布图
+
+    参数:
+        probabilities: 概率数组，shape为(n_classes,)
+        class_map: 气候类型名称列表
+        color_map: 气候类型颜色映射字典
+        location: 坐标 (lat, lon)
+        subtitle: 副标题
+        local_lang: 是否使用当地语言
+
+    返回:
+        plotly.graph_objects.Figure 对象
+    """
+    # 获取概率最高的5个类型的索引
+    top_3_indices = np.argsort(probabilities)[-3:][::-1]
+    
+    # 准备数据
+    classes = [class_map[i] for i in top_3_indices]
+    probs = probabilities[top_3_indices]
+    colors = [color_map[cls] for cls in classes]
+
+    fig = go.Figure()
+
+    # 添加概率条形图
+    fig.add_trace(
+        go.Bar(
+            x=classes,
+            y=probs,
+            marker_color=colors,
+            text=[f"{p:.1%}" for p in probs],  # 显示百分比
+            textposition="auto",
+            textfont=dict(size=13),
+        )
+    )
+
+    # 更新布局
+    fig.update_layout(
+        title=dict(
+            text=get_location_info(location, local_lang),
+            subtitle=dict(text=subtitle, font=dict(size=13)),
+            x=0.5,
+            xanchor="center",
+            y=0.95,
+            yanchor="top",
+            font=dict(size=14),
+        ),
+        margin=dict(t=60, l=60, r=60, b=30),
+        height=400,
+        yaxis=dict(
+            title="Probability",
+            range=[0, 1],
+            tickformat=".0%",
+            gridcolor="lightgray",
+            zeroline=True,
+            zerolinecolor="black",
+            tickfont=dict(size=13),
+        ),
+        xaxis=dict(
+            tickfont=dict(size=13),
+        ),
+        plot_bgcolor="white",
+        showlegend=False,
+    )
+
     return fig

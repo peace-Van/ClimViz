@@ -1,7 +1,7 @@
 """
 This file contains the definition of the neural network used for the Data-driven Ecological Climate Classification (DECC).
 For the sake of memory efficiency and simplicity, the inference of the network is implemented in NumPy.
-The model can be easily translated to other frameworks if you want to do some further work.
+The model can be easily translated to other frameworks if you want to do some future work.
 
 Author: Tracy Van
 Date: 2024-12-08
@@ -9,6 +9,15 @@ Date: 2024-12-08
 
 import numpy as np
 from numba import njit
+
+
+@njit
+def softmax(x):
+    # 计算指数
+    exp_x = np.exp(x)
+    # 手动计算和并扩展维度
+    sum_exp = exp_x.sum(axis=1).reshape(-1, 1)
+    return exp_x / sum_exp
 
 
 # Pad the data of December and January to the beginning and the end of the year
@@ -72,7 +81,7 @@ def pca(x, coeff, mu):
 @njit
 def som(x, centroid):
     distances = np.sum((x[:, np.newaxis, :] - centroid) ** 2, axis=2)
-    return np.argmin(distances, axis=1)
+    return softmax(-distances)
 
 
 # Custom activation function, also serves as data preprocessing
@@ -194,9 +203,9 @@ class Network:
         x = self.bn1(x)
         x[x < 0] = 0  # ReLU, output of this layer can be deemed as biome features
         x = self.fc2(x)
-        # When used for training there should be a softmax layer after fc2
-        # and we used binary cross-entropy as the loss function
+        x = softmax(x)
+        # We used binary cross-entropy as the loss function
 
         # Land Cover data (prediction target) was downloaded from MCD12C1 v061 (https://lpdaac.usgs.gov/products/mcd12c1v061/)
         # We used the IGBP land cover scheme, with the urban and water body types removed, and croplands merged with cropland-natural vegetation mosaics
-        return pca_features, np.argmax(x, axis=1)
+        return pca_features, x
