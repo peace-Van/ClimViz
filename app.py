@@ -8,6 +8,7 @@ from backend import (
     calc_change_rate,
     search_location,
     create_variable_chart,
+    create_probability_chart,
     VARIABLE_TYPE_INDICES,
     LATEST_YEAR,
 )
@@ -492,6 +493,7 @@ if __name__ == "__main__":
             st.info("Click Update Map to apply new settings")
 
         st.toggle("Plot global trend", value=True, key="show_global_trend", help="This applies only when no points are selected on the map")
+        st.toggle("Plot class probability", value=False, key="show_probability", help="This applies only when DECC or Predicted Land Cover is selected and there are points selected on the map")
         if st.session_state["map_type"] in [
             "Annual Mean Temperature",
             "Annual Total Precipitation",
@@ -500,14 +502,14 @@ if __name__ == "__main__":
             "Highest Monthly Precipitation",
             "Lowest Monthly Precipitation",
         ]:
-            unit = st.toggle(
+            st.toggle(
                 "&deg;F/inch",
                 value=False,
                 key="unit",
                 on_change=sync_settings_changed,
             )
         else:
-            unit = st.toggle("&deg;F/inch", value=False, key="unit")
+            st.toggle("&deg;F/inch", value=False, key="unit")
 
         col1, col2 = st.columns(2)
         with col1:
@@ -836,15 +838,44 @@ if __name__ == "__main__":
                                 )
 
                             if not st.session_state["change_rate"]:
-                                fig = create_climate_chart(
-                                    st.session_state["climate_data"][point_location],
-                                    point_location,
-                                    subtitle,
-                                    st.session_state[f"local_lang_{i}"],
-                                    st.session_state[f"july_first_{i}"],
-                                    st.session_state["unit"],
-                                    st.session_state[f"auto_scale_{i}"],
-                                )
+                                if st.session_state["show_probability"] and (st.session_state["map_type"].startswith("Data-driven Ecological") or st.session_state["map_type"] == "Predicted Land Cover"):
+                                    idx = np.where(
+                                        (indices[:, 0] == point_location[0])
+                                        & (indices[:, 1] == point_location[1])
+                                    )[0]
+                                    if st.session_state["map_type"].startswith("Data-driven Ecological"):
+                                        dl_classifier = simple_classifier if st.session_state["map_type"].endswith("Basic") else detailed_classifier
+                                        pca_features = st.session_state["climate_data"].pca_features[idx]
+                                        probs = dl_classifier.probability(pca_features)[0]  # 获取单个位置的概率分布
+                                        fig = create_probability_chart(
+                                            probabilities=probs,
+                                            class_map=dl_classifier.class_map,
+                                            color_map=dl_classifier.color_map,
+                                            location=point_location,
+                                            subtitle=subtitle,
+                                            local_lang=st.session_state[f"local_lang_{i}"],
+                                        )
+                                    else:
+                                        probs = st.session_state["climate_data"].veg_probabilities[idx, :].squeeze()
+                                        print(probs)
+                                        fig = create_probability_chart(
+                                            probabilities=probs,
+                                            class_map=VEG_MAP,
+                                            color_map=VEG_COLOR_MAP,
+                                            location=point_location,
+                                            subtitle=subtitle,
+                                            local_lang=st.session_state[f"local_lang_{i}"],
+                                        )
+                                else:
+                                    fig = create_climate_chart(
+                                        st.session_state["climate_data"][point_location],
+                                        point_location,
+                                        subtitle,
+                                        st.session_state[f"local_lang_{i}"],
+                                        st.session_state[f"july_first_{i}"],
+                                        st.session_state["unit"],
+                                        st.session_state[f"auto_scale_{i}"],
+                                    )
                             else:
                                 x = [i for i in range(1901, LATEST_YEAR + 1)]
                                 idx = np.where(

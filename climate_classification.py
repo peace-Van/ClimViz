@@ -463,10 +463,15 @@ class DLClassification:
 
     centroid: np.ndarray
 
+    # can do bulk operation
+    # pca_features: shape (N, 15)
+    def probability(self, pca_features: np.ndarray) -> np.ndarray:
+        return som(pca_features, self.centroid)
+
     # bulk operation
     # pca_features: shape (N, 15)
     def classify(self, pca_features: np.ndarray) -> list[str]:
-        cls_indices = som(pca_features, self.centroid)
+        cls_indices = np.argmax(self.probability(pca_features), axis=1)
         return [self.class_map[i] for i in cls_indices]
 
 
