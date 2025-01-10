@@ -857,7 +857,6 @@ if __name__ == "__main__":
                                         )
                                     else:
                                         probs = st.session_state["climate_data"].veg_probabilities[idx, :].squeeze()
-                                        print(probs)
                                         fig = create_probability_chart(
                                             probabilities=probs,
                                             class_map=VEG_MAP,
