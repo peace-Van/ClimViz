@@ -852,7 +852,7 @@ if __name__ == "__main__":
                                             class_map=dl_classifier.class_map,
                                             color_map=dl_classifier.color_map,
                                             location=point_location,
-                                            subtitle=subtitle,
+                                            subtitle=f"Cryohumidity: {pca_features[0, 0]:.2f}, Continentality: {pca_features[0, 1]:.2f}, Seasonality: {pca_features[0, 2]:.2f}",
                                             local_lang=st.session_state[f"local_lang_{i}"],
                                         )
                                     else:

@@ -356,7 +356,7 @@ def get_location_info(location: tuple[float, float], local_lang: bool = False) -
     while tries > 0:
         try:
             location_info = geolocator.reverse(
-                location, language="en" if not local_lang else False
+                location, language="en" if not local_lang else False, zoom=10
             )
             if location_info and location_info.raw.get("address"):
                 return location_info.address
