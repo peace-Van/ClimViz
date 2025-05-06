@@ -193,7 +193,7 @@ def calc_climate_normals(
 
 @st.cache_resource
 def get_network(_weight_file: str) -> DLModel:
-    model = DLModel('cpu', None)
+    model = DLModel('cpu')
     model = torch.compile(model)
     model.load_state_dict(torch.load(_weight_file))
     model.mode = 'inference'
