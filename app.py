@@ -195,7 +195,7 @@ def calc_climate_normals(
 def get_network(_weight_file: str) -> DLModel:
     model = DLModel('cpu')
     model = torch.compile(model)
-    model.load_state_dict(torch.load(_weight_file))
+    model.load_state_dict(torch.load(_weight_file, map_location=torch.device('cpu')))
     model.mode = 'inference'
     model.eval()
     return model
