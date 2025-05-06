@@ -36,16 +36,20 @@ ENV/
 .pydevproject
 .settings/
 
-# 项目特定文件
 .DS_Store
 *.html
 *.sh
 
-# 临时文件
 tmp/
 temp/
 .ipynb_checkpoints/
 
-# 本地配置
 config.local.ini
 secrets.json 
+
+centroids.mat
+preds.mat
+pretrain_centroids.mat
+sample_data.mat
+to_pred.mat
+spec.txt
