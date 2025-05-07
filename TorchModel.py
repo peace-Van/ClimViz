@@ -363,7 +363,6 @@ class DLModel(nn.Module):
 #         self.pca_mu = torch.nn.Parameter(torch.from_numpy(weight_file["mu"][:]).to(self.device), requires_grad=False)
 
 
-# code for fine-tuning MATLAB-pretrained model
 # if __name__ == "__main__":
 #     import torch.optim as optim
 #     import time
@@ -374,6 +373,8 @@ class DLModel(nn.Module):
 #     from torch.utils.data import DataLoader, TensorDataset
 #     from tqdm import tqdm
 
+
+# # code for testing
 #     # device = 'cpu'
 
 #     # model = DLModel(device, None)
@@ -402,6 +403,8 @@ class DLModel(nn.Module):
 #     # print(prob.numpy(force=True))
 #     # print(veg.numpy(force=True))
 
+
+# # code for fine-tuning MATLAB-pretrained model
 #     torch.set_float32_matmul_precision('high')
     
 #     batch_size = 256
