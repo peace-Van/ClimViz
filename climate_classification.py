@@ -9,144 +9,6 @@ import numpy as np
 
 EPS = 1e-5
 
-# Advanced DECC
-# DETAILED_MAP = [
-#     "Dm",
-#     "Ds",
-#     "Df",
-#     "Fx",
-#     "Cf",
-#     "Em",
-#     "Gw",
-#     "Gm",
-#     "Cw",
-#     "Dx",
-#     "Ex",
-#     "Aw",
-#     "Bm",
-#     "Bx",
-#     "Fm",
-#     "Ff",
-#     "Cm",
-#     "Dw",
-#     "Af",
-#     "Cs",
-#     "Es",
-#     "Ew",
-#     "Bw",
-#     "Gx",
-#     "Gs",
-#     "Am",
-# ]
-
-# DETAILED_COLOR_MAP = {
-#     # A组 - 热带湿润气候
-#     "Af": "#FF0000",  # 深红色，热带雨林
-#     "Am": "#FF6666",  # 浅红色，热带季风
-#     "Aw": "#FF9999",  # 粉红色，热带草原
-    
-#     # B组 - 干燥气候
-#     "Bm": "#CC3300",  # 浅橙色，温和沙漠
-#     "Bw": "#FF6600",  # 亮橙色，季节性半干旱（更亮）
-#     "Bx": "#993300",  # 深棕色，极端沙漠
-    
-#     # C组 - 亚热带湿润气候
-#     "Cf": "#006600",  # 深绿色，亚热带海洋性
-#     "Cm": "#99FF99",  # 浅绿色，亚热带季风
-#     "Cw": "#CCFF99",  # 黄绿色，干冬亚热带
-#     "Cs": "#66CC00",  # 黄绿色，地中海气候
-    
-#     # D组 - 温带气候
-#     "Df": "#00CC99",  # 青绿色，温带海洋性（偏绿）
-#     "Dm": "#009999",  # 中蓝色，湿润大陆性
-#     "Dw": "#99CCFF",  # 浅蓝色，干冬大陆性
-#     "Ds": "#0099CC",  # 青蓝色，半湿润大陆性（偏绿）
-#     "Dx": "#D9C97C",  # 灰黄色，干旱温带（与Bm/Bx/Ex区分）
-    
-#     # E组 - 高地和干旱大陆性气候
-#     "Em": "#9966CC",  # 紫色，温和高地
-#     "Ew": "#FFCC00",  # 金黄色，干冬半干旱
-#     "Es": "#FFCC99",  # 肉色，干夏半干旱
-#     "Ex": "#FF9933",  # 深橙色，极端干旱
-    
-#     # F组 - 亚极地和亚寒带气候
-#     "Ff": "#3366CC",  # 亮蓝色，亚极地海洋性
-#     "Fm": "#006699",  # 深蓝紫色，亚寒带大陆性
-#     "Fx": "#00CCCC",  # 深青色，极端大陆性
-    
-#     # G组 - 极地气候
-#     "Gm": "#000099",  # 深蓝色，亚极地-极地过渡
-#     "Gw": "#CC99FF",  # 浅紫色，高山苔原
-#     "Gs": "#99FFFF",  # 浅青色，凉爽夏季极地
-#     "Gx": "#FFFFFF"   # 白色，寒冷夏季极地
-# }
-
-
-# DETAILED_ORDER = [
-#     "Af",
-#     "Am",
-#     "Aw",
-#     "Bm",
-#     "Bw",
-#     "Bx",
-#     "Cf",
-#     "Cm",
-#     "Cw",
-#     "Cs",
-#     "Df",
-#     "Dm",
-#     "Dw",
-#     "Ds",
-#     "Dx",
-#     "Em",
-#     "Ew",
-#     "Es",
-#     "Ex",
-#     "Ff",
-#     "Fm",
-#     "Fx",
-#     "Gm",
-#     "Gw",
-#     "Gs",
-#     "Gx",
-# ]
-
-# Land Cover
-# VEG_MAP = [
-#     "evergreen needleleaf forest",
-#     "deciduous needleleaf forest",
-#     "evergreen broadleaf forest",
-#     "deciduous broadleaf forest",
-#     "mixed forest",
-#     "closed shrubland",
-#     "open shrubland",
-#     "woody savanna",
-#     "savanna",
-#     "grassland",
-#     "permanent wetland",
-#     "cropland mosaics",
-#     "snow and ice",
-#     "barren",
-# ]
-
-# VEG_COLOR_MAP = {
-#     "evergreen needleleaf forest": "#1A9850",  # 深绿色
-#     "deciduous needleleaf forest": "#66BD63",  # 中绿色
-#     "evergreen broadleaf forest": "#006837",  # 暗绿色
-#     "deciduous broadleaf forest": "#A6D96A",  # 浅绿色
-#     "mixed forest": "#D9EF8B",  # 黄绿色
-#     "closed shrubland": "#BF812D",  # 深棕色
-#     "open shrubland": "#DFC27D",  # 浅棕色
-#     "woody savanna": "#F6E8C3",  # 米黄色
-#     "savanna": "#FED98E",  # 浅黄色
-#     "grassland": "#FFFFBF",  # 淡黄色
-#     "permanent wetland": "#80CDC1",  # 青绿色
-#     "cropland mosaics": "#C7EAE5",  # 浅青色
-#     "snow and ice": "#FFFFFF",  # 白色
-#     "barren": "#F4A582",  # 浅褐色
-# }
-
-
 class KoppenClassification:
     order = [
         "Af",
@@ -498,11 +360,11 @@ class DLClassification:
         # A组 - 热带湿润气候
         "Af": "#FF0000",  # 深红色，热带雨林
         "Am": "#FF6666",  # 浅红色，热带季风
-        "Aw": "#FF9999",  # 粉红色，热带草原
+        "Aw": "#FFD580",  # 浅橙黄，热带草原（优化后）
         
         # B组 - 干燥气候
         "Bm": "#CC3300",  # 浅橙色，温和沙漠
-        "Bw": "#FF6600",  # 亮橙色，季节性半干旱（更亮）
+        "Bw": "#FF9933",  # 亮橙色，季节性半干旱（更亮）
         "Bx": "#993300",  # 深棕色，极端沙漠
         
         # C组 - 亚热带湿润气候
@@ -512,7 +374,7 @@ class DLClassification:
         "Cs": "#66CC00",  # 黄绿色，地中海气候
         
         # D组 - 温带气候
-        "Df": "#00CC99",  # 青绿色，温带海洋性（偏绿）
+        "Df": "#00CC99",  # 青绿色, 温带海洋性（偏绿）
         "Dm": "#009999",  # 中蓝色，湿润大陆性
         "Dw": "#99CCFF",  # 浅蓝色，干冬大陆性
         "Ds": "#0099CC",  # 青蓝色，半湿润大陆性（偏绿）
@@ -522,7 +384,7 @@ class DLClassification:
         "Em": "#9966CC",  # 紫色，温和高地
         "Ew": "#FFCC00",  # 金黄色，干冬半干旱
         "Es": "#FFCC99",  # 肉色，干夏半干旱
-        "Ex": "#FF9933",  # 深橙色，极端干旱
+        "Ex": "#A67C29",  # 深土黄色，极端干旱（优化后）
         
         # F组 - 亚极地和亚寒带气候
         "Ff": "#3366CC",  # 亮蓝色，亚极地海洋性
