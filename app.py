@@ -555,6 +555,8 @@ if __name__ == "__main__":
             """
         )
 
+        st.page_link("https://climcalc.streamlit.app", icon=":material/query_stats:", label="ClimCalc - Get climate type for your location or data")
+
     if submitted or st.session_state["fig"] is None:
         # clean the old chart
         if "fig" in st.session_state:
@@ -569,7 +571,7 @@ if __name__ == "__main__":
         if start_year_ == 90 and years == 30:
             st.session_state["climate_data"] = default_data
         elif st.session_state["year_range_changed"]:
-            with st.spinner("Calculating... (may take one minute)"):
+            with st.spinner("Calculating..."):
                 st.session_state["climate_data"] = calc_climate_normals(
                     start_year_, years, data_file, indices, elev, network
                 )
@@ -791,7 +793,7 @@ if __name__ == "__main__":
                                     "Auto scale axes",
                                     value=st.session_state["change_rate"],
                                     key=f"auto_scale_{i}",
-                                    disabled=st.session_state["change_rate"],
+                                    disabled=st.session_state["change_rate"] or st.session_state["show_probability"],
                                 )
                             with col2:
                                 st.checkbox(
@@ -802,7 +804,7 @@ if __name__ == "__main__":
                                     "July first",
                                     value=False,
                                     key=f"july_first_{i}",
-                                    disabled=st.session_state["change_rate"],
+                                    disabled=st.session_state["change_rate"] or st.session_state["show_probability"],
                                 )
 
                             if not st.session_state["change_rate"]:
