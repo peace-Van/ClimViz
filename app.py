@@ -555,7 +555,7 @@ if __name__ == "__main__":
             """
         )
 
-        st.page_link("https://climcalc.streamlit.app", icon=":material/query_stats:", label="ClimCalc - Get climate type for your location or data")
+        st.page_link("https://climcalc.streamlit.app", icon=":material/query_stats:", label="ClimCalc", help="Get climate type for your location or data")
 
     if submitted or st.session_state["fig"] is None:
         # clean the old chart
