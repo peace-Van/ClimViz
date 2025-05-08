@@ -47,9 +47,8 @@ temp/
 config.local.ini
 secrets.json 
 
-centroids.mat
-preds.mat
-pretrain_centroids.mat
-sample_data.mat
-to_pred.mat
+*.mat
 spec.txt
+best_model_.pth
+moving_pca.py
+predict.py
