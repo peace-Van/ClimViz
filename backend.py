@@ -160,6 +160,12 @@ class ClimateData:
     
     def get_variable_data(self) -> np.ndarray:
         return np.vstack([self.tmp, self.tmn, self.tmx, self.pre])
+    
+    def get_all_data(self) -> np.ndarray:
+        return np.vstack([self.tmp, self.tmn, self.tmx, self.pre, self.pet])
+    
+    def get_elev(self) -> float:
+        return self.elev
 
 
 @dataclass
@@ -438,10 +444,8 @@ class LocationService:
 
 def create_climate_chart(
     climate_data: ClimateData,
-    locationService: LocationService,
-    location: tuple[float, float],
+    title: str,
     subtitle: str,
-    local_lang: bool,
     july_first: bool,
     unit: bool,
     auto_scale: bool,
@@ -451,12 +455,11 @@ def create_climate_chart(
 
     Args:
         climate_data: ClimateData object
-        location: coordinates (lat, lon)
-        local_lang: whether to use local language
+        title: title
+        subtitle: subtitle
         july_first: whether to start from July
         unit: whether to use °F/inch
         auto_scale: whether to auto scale
-        locationService: LocationService object
     Returns:
         plotly.graph_objects.Figure object
     """
@@ -573,7 +576,7 @@ def create_climate_chart(
     # update layout
     fig.update_layout(
         title=dict(
-            text=locationService.get_location_info(location, local_lang),
+            text=title,
             subtitle=dict(text=subtitle, font=dict(size=13)),
             x=0.5,
             xanchor="center",
@@ -649,19 +652,14 @@ def moving_average(a, n=30):
 def create_variable_chart(
     y: np.ndarray,
     location: tuple[float, float] | None,
-    locationService: LocationService | None,
+    title: str,
     subtitle: str,
     map_type: str,
     unit: bool,
-    local_lang: bool,
     mov_avg: bool = False,
 ) -> go.Figure:
     fig = go.Figure()
-    title = (
-        locationService.get_location_info(location, local_lang)
-        if locationService and location
-        else ("Global Average " + map_type)
-    )
+
 
     if map_type in [
         "Annual Mean Temperature",
@@ -739,10 +737,8 @@ def create_probability_chart(
     probabilities: np.ndarray,
     class_map: list[str],
     color_map: dict[str, str],
-    location: tuple[float, float],
+    title: str,
     subtitle: str,
-    local_lang: bool,
-    locationService: LocationService,
 ) -> go.Figure:
     """
     create climate type probability distribution chart
@@ -751,10 +747,8 @@ def create_probability_chart(
         probabilities: probability array, shape is (n_classes,)
         class_map: climate type name list
         color_map: climate type color mapping dictionary
-        location: coordinates (lat, lon)
+        title: title
         subtitle: sub-title
-        local_lang: whether to use local language
-        locationService: LocationService object
     Returns:
         plotly.graph_objects.Figure object
     """
@@ -784,7 +778,7 @@ def create_probability_chart(
     # update layout
     fig.update_layout(
         title=dict(
-            text=locationService.get_location_info(location, local_lang),
+            text=title,
             subtitle=dict(text=subtitle, font=dict(size=13)),
             x=0.5,
             xanchor="center",
