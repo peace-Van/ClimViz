@@ -422,14 +422,16 @@ class DLModel(nn.Module):
     
 #     print("Using device:", device)
 
-#     centroids = loadmat("pretrain_centroids.mat")["new_centroid"]
-
 #     model = DLModel(device, centroids)
-#     with h5py.File("weights.h5", "r") as weight_file:
+#     with h5py.File("dataset/weights.h5", "r") as weight_file:
 #         model.init_weights(weight_file, k, T)
 #     model = model.to(device)
 #     model = torch.compile(model)
 
+#     # Sorry I can't provide the dataset in the GitHub repo
+#     # You can download it from CRU TS v4.06
+#     # https://crudata.uea.ac.uk/cru/data/hrg/cru_ts_4.06/
+#     # The features data can be obtained by passing the inputs to the MATLAB pretrained model (You can reconstruct it in PyTorch from dataset/weights.h5)
 #     data = loadmat("data.mat")    
 #     inputs = data["inputs"]       # model inputs (batch, 3, 12) - climate normals
 #     features = data["features"]   # MATLAB-pretrained climate features (batch, 120), teacher knowledge
@@ -440,6 +442,7 @@ class DLModel(nn.Module):
 #     inputs = torch.from_numpy(inputs).float().pin_memory().to(device, non_blocking=True)
 #     features = torch.from_numpy(features).float().pin_memory().to(device, non_blocking=True)
 #     targets = torch.from_numpy(targets).float().pin_memory().to(device, non_blocking=True)
+#     # Last year in the dataset
 #     valid_inputs = inputs[-67213:, :, :]
 #     valid_features = features[-67213:, :]
 #     valid_targets = targets[-67213:, :]

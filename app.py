@@ -1,8 +1,10 @@
 import streamlit as st
 import numpy as np
 import plotly.express as px
+import pandas as pd
 import torch
 from backend import (
+    ClimateData,
     ClimateDataset,
     get_average,
     create_climate_chart,
@@ -199,6 +201,13 @@ def get_network(_weight_file: str) -> DLModel:
     model.mode = 'inference'
     model.eval()
     return model
+
+
+def get_download_data(climate_data: ClimateData) -> tuple[float, str]:
+    elev = climate_data.get_elev()
+    data = climate_data.get_all_data()
+    data = pd.DataFrame(data, columns=["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], index=["tmp", "tmn", "tmx", "pre", "pet"])
+    return elev, data.to_csv().encode('utf-8')
 
 
 def sync_slider():
@@ -787,6 +796,8 @@ if __name__ == "__main__":
                 with cols[i]:
                     with st.empty():
                         with st.container():
+                            download_data = None
+                            elev_ = None
                             col1, col2, col3, col4 = st.columns(4)
                             with col1:
                                 st.checkbox(
@@ -808,6 +819,7 @@ if __name__ == "__main__":
                                 )
 
                             if not st.session_state["change_rate"]:
+                                title = locationService.get_location_info(point_location, st.session_state[f"local_lang_{i}"])
                                 if st.session_state["show_probability"] and st.session_state["map_type"] == "DeepEcoClimate":
                                     # print(st.session_state["climate_data"].data[point_location].get_dl_data())
                                     idx = np.where(
@@ -823,22 +835,19 @@ if __name__ == "__main__":
                                         probabilities=probs,
                                         class_map=DLClassification.class_map,
                                         color_map=DLClassification.color_map,
-                                        location=point_location,
+                                        title=title,
                                         subtitle=f"Thermal Index: {thermal_index:.2f}, Aridity Index: {aridity_index:.2f}",
-                                        local_lang=st.session_state[f"local_lang_{i}"],
-                                        locationService=locationService,
                                     )
                                 else:
                                     fig = create_climate_chart(
                                         st.session_state["climate_data"][point_location],
-                                        locationService,
-                                        point_location,
-                                        subtitle,
-                                        st.session_state[f"local_lang_{i}"],
-                                        st.session_state[f"july_first_{i}"],
-                                        st.session_state["unit"],
-                                        st.session_state[f"auto_scale_{i}"],
+                                        title=title,
+                                        subtitle=subtitle,
+                                        july_first=st.session_state[f"july_first_{i}"],
+                                        unit=st.session_state["unit"],
+                                        auto_scale=st.session_state[f"auto_scale_{i}"],
                                     )
+                                    elev_, download_data = get_download_data(st.session_state["climate_data"][point_location])
                             else:
                                 x = [i for i in range(1901, LATEST_YEAR + 1)]
                                 idx = np.where(
@@ -857,16 +866,27 @@ if __name__ == "__main__":
                                 )
                                 fig = create_variable_chart(
                                     y,
-                                    point_location,
+                                    title,
                                     subtitle,
                                     st.session_state["map_type"],
                                     st.session_state["unit"],
-                                    st.session_state[f"local_lang_{i}"],
-                                    locationService=locationService,
                                     mov_avg=st.session_state[f"mov_avg_{i}"],
                                 )
 
                             st.plotly_chart(fig, use_container_width=True)
+
+                            if download_data:
+                                col1, col2, col3 = st.columns(3)
+                                with col2:
+                                    st.download_button(
+                                        label="Download data",
+                                        data=download_data,
+                                        file_name=f"{title} ({elev_:.0f}m).csv",
+                                        mime="text/csv",
+                                        icon=":material/download:",
+                                        help="All downloaded data use metric units. For full dataset download, please go to [GitHub repo](https://github.com/peace-Van/ClimViz/tree/main/dataset).",
+                                        use_container_width=True,
+                                    )
 
                             gc.collect()
 
