@@ -879,12 +879,12 @@ if __name__ == "__main__":
                                 col1, col2, col3 = st.columns(3)
                                 with col2:
                                     st.download_button(
-                                        label="Download data",
+                                        label="Download data (.csv)",
                                         data=download_data,
                                         file_name=f"{title} ({elev_:.0f}m).csv",
                                         mime="text/csv",
                                         icon=":material/download:",
-                                        help="All downloaded data use metric units. For full dataset download, please go to [GitHub repo](https://github.com/peace-Van/ClimViz/tree/main/dataset).",
+                                        help="All downloaded data use &deg;C/mm unit. For full dataset download, please go to [GitHub repo](https://github.com/peace-Van/ClimViz/tree/main/dataset).",
                                         use_container_width=True,
                                     )
 
