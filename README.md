@@ -1,6 +1,6 @@
 # ClimViz - World Climate Explorer
 
-![DeepEcoClimate]("world.png")
+![DeepEcoClimate](world.png)
 
 [ClimViz](https://climviz.streamlit.app/) is an interactive web application for exploring global climate data, visualizing climate classifications, and analyzing climate variables and trends. It leverages deep learning, advanced climate indices, and interactive charts to provide a comprehensive climate data exploration experience.
 
