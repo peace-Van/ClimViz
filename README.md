@@ -93,7 +93,7 @@
 
 ## Citation
 
-If you use DeepEcoClimate or its data in your research, please cite the original data sources and this repo and/or ClimCalc repo.
+If you use DeepEcoClimate or its data in your research, please cite the original data sources and this repo and/or [ClimCalc](https://github.com/peace-Van/ClimCalc/tree/main) repo.
 
 ## License
 
