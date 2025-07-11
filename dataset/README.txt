@@ -15,7 +15,7 @@ Temperatures are in Celcius, precipitation and PET are in millimeters
 
 -------------------------------------
 
-MD5 checksum for climate_variables.h5: 8ee8a8481403dc67cca2349f460a8e5d
+MD5 checksum for climate_variables.h5: 0dfedc2853882e0295cc68f5c201af7f
 
 The hdf5 file contains 1 dataset with gzip compression
 

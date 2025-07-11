@@ -23,6 +23,7 @@ from climate_classification import (
 )
 from TorchModel import DLModel
 import gc
+torch.classes.__path__ = []
 
 
 MAP_TYPES = {
@@ -68,22 +69,22 @@ RANGES = {
     ],
     "Aridity Index": [
         [
-            (-0.8, 0.8),  # value
-            (-0.8, 0.8),
+            (-2, 2),  # value
+            (-2, 2),
         ],
         [
-            (-0.01, 0.01),  # change rate
-            (-0.01, 0.01),
+            (-0.04, 0.04),  # change rate
+            (-0.04, 0.04),
         ],
     ],
     "Thermal Index": [
         [
-            (-0.8, 0.8),  # value
-            (-0.8, 0.8),
+            (-2, 2),  # value
+            (-2, 2),
         ],
         [
-            (-0.01, 0.01),  # change rate
-            (-0.01, 0.01),
+            (-0.02, 0.02),  # change rate
+            (-0.02, 0.02),
         ],
     ],
     "Coldest Month Mean Temperature": [
@@ -343,7 +344,7 @@ if __name__ == "__main__":
         st.session_state["change_rate"] = False
 
     data_file, indices, elev, variable_file, locationService = load_resources()
-    network = get_network("best_model.pth")
+    network = get_network("model.pth")
     default_data = load_default_data(data_file, indices, elev, network)
 
     gc.collect()
@@ -820,6 +821,7 @@ if __name__ == "__main__":
 
                             if not st.session_state["change_rate"]:
                                 title = locationService.get_location_info(point_location, st.session_state[f"local_lang_{i}"])
+
                                 if st.session_state["show_probability"] and st.session_state["map_type"] == "DeepEcoClimate":
                                     # print(st.session_state["climate_data"].data[point_location].get_dl_data())
                                     idx = np.where(
@@ -829,6 +831,7 @@ if __name__ == "__main__":
                                     # if st.session_state["map_type"] == "DeepEcoClimate":
                                     thermal_index = st.session_state["climate_data"].thermal_index[idx][0]
                                     aridity_index = st.session_state["climate_data"].aridity_index[idx][0]
+
                                     # print(thermal_index, aridity_index)
                                     probs = st.session_state["climate_data"].probabilities[idx, :].squeeze()
                                     fig = create_probability_chart(
@@ -876,8 +879,8 @@ if __name__ == "__main__":
                             st.plotly_chart(fig, use_container_width=True)
 
                             if download_data:
-                                col1, col2, col3 = st.columns(3)
-                                with col2:
+                                col1_, col2_, col3_ = st.columns(3)
+                                with col2_:
                                     st.download_button(
                                         label="Download data (.csv)",
                                         data=download_data,
@@ -935,11 +938,10 @@ if __name__ == "__main__":
                                 fig = create_variable_chart(
                                     y,
                                     None,
-                                    None,
+                                    "Global Average Annual Mean Temperature",
                                     "",
                                     "Annual Mean Temperature",
                                     st.session_state["unit"],
-                                    False,
                                     mov_avg=st.session_state["mov_avg_global_0"],
                                 )
                                 st.plotly_chart(fig, use_container_width=True)
@@ -959,11 +961,10 @@ if __name__ == "__main__":
                                 fig = create_variable_chart(
                                     y,
                                     None,
-                                    None,
+                                    "Global Average Annual Total Precipitation",
                                     "",
                                     "Annual Total Precipitation",
                                     st.session_state["unit"],
-                                    False,
                                     mov_avg=st.session_state["mov_avg_global_1"],
                                 )
                                 st.plotly_chart(fig, use_container_width=True)
@@ -983,10 +984,9 @@ if __name__ == "__main__":
                                 fig = create_variable_chart(
                                     y,
                                     None,
-                                    None,
+                                    "Global Average Thermal Index",
                                     "",
                                     "Thermal Index",
-                                    False,
                                     False,
                                     mov_avg=st.session_state["mov_avg_global_0"],
                                 )
@@ -1006,10 +1006,9 @@ if __name__ == "__main__":
                                 fig = create_variable_chart(
                                     y,
                                     None,
-                                    None,
+                                    "Global Average Aridity Index",
                                     "",
                                     "Aridity Index",
-                                    False,
                                     False,
                                     mov_avg=st.session_state["mov_avg_global_1"],
                                 )
@@ -1033,11 +1032,10 @@ if __name__ == "__main__":
                                 fig = create_variable_chart(
                                     y,
                                     None,
-                                    None,
+                                    "Global Average " + st.session_state["map_type"],
                                     "",
                                     st.session_state["map_type"],
                                     st.session_state["unit"],
-                                    False,
                                     mov_avg=st.session_state["mov_avg_global_1"],
                                 )
                                 st.plotly_chart(fig, use_container_width=True)
