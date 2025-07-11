@@ -304,6 +304,7 @@ class DLClassification:
         "Aw",
         "Bm",
         "Bw",
+        "Bs",
         "Bx",
         "Cf",
         "Cm",
@@ -313,14 +314,13 @@ class DLClassification:
         "Dm",
         "Dw",
         "Ds",
-        "Dx",
         "Em",
         "Ew",
         "Es",
         "Ex",
         "Ff",
         "Fm",
-        "Fx",
+        "Fs",
         "Gm",
         "Gw",
         "Gs",
@@ -328,43 +328,44 @@ class DLClassification:
     ]
 
     class_map = [
-        "Dm",
-        "Ds",
-        "Df",
-        "Fx",
-        "Cf",
-        "Em",
         "Gw",
-        "Gm",
-        "Cw",
-        "Dx",
         "Ex",
-        "Aw",
-        "Bm",
-        "Bx",
+        "Em",
+        "Gm",
         "Fm",
-        "Ff",
-        "Cm",
-        "Dw",
-        "Af",
-        "Cs",
-        "Es",
-        "Ew",
+        "Bm",
+        "Dm",
         "Bw",
-        "Gx",
+        "Df",
+        "Cw",
+        "Cm",
+        "Ff",
+        "Bs",
+        "Es",
+        "Dw",
+        "Ds",
         "Gs",
+        "Cf",
         "Am",
+        "Af",
+        "Gx",
+        "Bx",
+        "Fs",
+        "Ew",
+        "Aw",
+        "Cs",
     ]
 
     color_map = {
         # A组 - 热带湿润气候
         "Af": "#FF0000",  # 深红色，热带雨林
         "Am": "#FF6666",  # 浅红色，热带季风
-        "Aw": "#FFD580",  # 浅橙黄，热带草原（优化后）
+        "Aw": "#FF9933",  # 浅橙黄，热带草原
         
         # B组 - 干燥气候
-        "Bm": "#CC3300",  # 浅橙色，温和沙漠
-        "Bw": "#FF9933",  # 亮橙色，季节性半干旱（更亮）
+        "Bm": "#FFD580",  # 浅橙色，温和沙漠
+        "Bw": "#CC3300",  # 亮橙色，季节性半干旱（更亮）
+        "Bs": "#D9C97C",  # 灰黄色，干旱温带（与Bm/Bx/Ex区分）
         "Bx": "#993300",  # 深棕色，极端沙漠
         
         # C组 - 亚热带湿润气候
@@ -378,18 +379,17 @@ class DLClassification:
         "Dm": "#009999",  # 中蓝色，湿润大陆性
         "Dw": "#99CCFF",  # 浅蓝色，干冬大陆性
         "Ds": "#007CC0",  # 青蓝色，半湿润大陆性（偏绿）
-        "Dx": "#D9C97C",  # 灰黄色，干旱温带（与Bm/Bx/Ex区分）
         
         # E组 - 高地和干旱大陆性气候
         "Em": "#9966CC",  # 紫色，温和高地
         "Ew": "#FFCC00",  # 金黄色，干冬半干旱
         "Es": "#FFCC99",  # 肉色，干夏半干旱
-        "Ex": "#A67C29",  # 深土黄色，极端干旱（优化后）
+        "Ex": "#A67C29",  # 深土黄色，极端干旱
         
         # F组 - 亚极地和亚寒带气候
         "Ff": "#3366CC",  # 亮蓝色，亚极地海洋性
         "Fm": "#006699",  # 深蓝紫色，亚寒带大陆性
-        "Fx": "#00CCCC",  # 深青色，极端大陆性
+        "Fs": "#00CCCC",  # 深青色，极端大陆性
         
         # G组 - 极地气候
         "Gm": "#000099",  # 深蓝色，亚极地-极地过渡
@@ -403,113 +403,4 @@ class DLClassification:
     def classify(cls, probabilities: np.ndarray) -> list[str]:
         cls_indices = np.argmax(probabilities, axis=1)
         return [cls.class_map[i] for i in cls_indices]
-
-
-# # usage
-# if __name__ == "__main__":
-#     from DLModel import DenseNetwork
-#     import h5py
-
-#     np.set_printoptions(suppress=True, precision=4)
-
-#     example_data = np.array(
-#         [
-#             [
-#                 [
-#                     2.7,
-#                     4.9,
-#                     8.4,
-#                     12.9,
-#                     17.2,
-#                     20.5,
-#                     22.1,
-#                     21.7,
-#                     18.9,
-#                     14.7,
-#                     9.6,
-#                     4.2,
-#                 ],  # low temperature in Celsius
-#                 [
-#                     8.1,
-#                     11.4,
-#                     24.1,
-#                     44.9,
-#                     78.0,
-#                     109.5,
-#                     231.8,
-#                     217.1,
-#                     120.8,
-#                     42.6,
-#                     14.8,
-#                     6.2,
-#                 ],  # precipitation in mm
-#                 [
-#                     9.3,
-#                     12.1,
-#                     16.8,
-#                     22.5,
-#                     26.3,
-#                     28.3,
-#                     30.0,
-#                     29.9,
-#                     25.7,
-#                     20.7,
-#                     16.0,
-#                     10.7,
-#                 ],  # high temperature in Celsius
-#             ]
-#         ], dtype=np.float32)
-#     # shape should be (batch_size, 3, 12)
-#     print("Input Shape:", example_data.shape)
-
-#     # data may also be loaded from the downloaded data file
-#     # with h5py.File('climate_data_land.h5', 'r') as f:
-#     #     indices = f.get('indices')[:]       # latitude and longitude of all the locations
-#     #     # example is given as a single location and single year, you can also do bulk processing
-#     #     lat, lon = 30.6, 105.8
-#     #     year = 2010
-#     #     # round to the nearest 0.5 degree
-#     #     lat = round(lat * 2) / 2
-#     #     lon = round(lon * 2) / 2
-#     #     idx = np.where((indices[:, 0] == lat) & (indices[:, 1] == lon))[0]
-#     #     tmp = f.get('tmp')[idx, year - 1901, :]
-#     #     pre = f.get('pre')[idx, year - 1901, :]
-#     #     pet = f.get('pet')[idx, year - 1901, :]
-#     #     example_data = np.array([tmp, pre, pet])
-#     #     example_data = example_data.transpose(1, 0, 2)
-
-#     with h5py.File("weights.h5", "r") as f:
-#         network = DenseNetwork(f)
-#         # pca_features, probability = network(example_data)
-#         thermal_index, aridity_index, probability, veg_index = network(example_data)
-#         advanced_dl_classifier = DLClassification(
-#             order=DETAILED_ORDER,
-#             class_map=DETAILED_MAP,
-#             color_map=DETAILED_COLOR_MAP,
-#         )
-#         # basic_dl_classifier = DLClassification(
-#         #     order=SIMPLE_ORDER,
-#         #     class_map=SIMPLE_MAP,
-#         #     color_map=SIMPLE_COLOR_MAP,
-#         # )
-
-#         # print("Cryohumidity:", pca_features[0][0])
-#         # print("Continentality:", pca_features[1][0])
-#         # print("Seasonality:", pca_features[2][0])
-#         print("Thermal Index:", thermal_index[0])
-#         print("Aridity Index:", aridity_index[0])
-#         print("Probability:", probability)
-
-#         print("DeepEcoClimate Type:", advanced_dl_classifier.classify(probability)[0])
-#         # print("Basic DECC Type:", basic_dl_classifier.classify(probability)[0])
-#         print("Land Cover Type:", VEG_MAP[veg_index[0]])
-
-#         # For the classic climate classification, bulk operation is not supported
-#         # example_data = example_data.squeeze()
-#         # print(
-#         #     "Köppen-Geiger Type:",
-#         #     KoppenClassification.classify(
-#         #         example_data, cd_threshold=-3, kh_mode="mean_temp"
-#         #     ),
-#         # )
-#         # print("Trewartha Type:", TrewarthaClassification.classify(example_data))
+    

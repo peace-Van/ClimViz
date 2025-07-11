@@ -652,8 +652,8 @@ def moving_average(a, n=30):
 def create_variable_chart(
     y: np.ndarray,
     location: tuple[float, float] | None,
-    title: str,
-    subtitle: str,
+    title: str | None,
+    subtitle: str | None,
     map_type: str,
     unit: bool,
     mov_avg: bool = False,
@@ -670,10 +670,10 @@ def create_variable_chart(
     ]:
         if unit:
             y = celcius_to_fahrenheit(y)
-            if not location:
+            if not location and title is not None:
                 title += " (°F)"
         else:
-            if not location:
+            if not location and title is not None:
                 title += " (°C)"
     elif map_type in [
         "Annual Total Precipitation",
@@ -682,10 +682,10 @@ def create_variable_chart(
     ]:
         if unit:
             y = mm_to_inch(y)
-            if not location:
+            if not location and title is not None:
                 title += " (inch)"
         else:
-            if not location:
+            if not location and title is not None:
                 title += " (mm)"
 
     if mov_avg:
@@ -705,8 +705,8 @@ def create_variable_chart(
     )
     fig.update_layout(
         title=dict(
-            text=title,
-            subtitle=dict(text=subtitle, font=dict(size=13)),
+            text=title if title is not None else "",
+            subtitle=dict(text=subtitle, font=dict(size=13)) if subtitle is not None else None,
             x=0.5,
             xanchor="center",
             y=0.95,
