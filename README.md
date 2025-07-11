@@ -50,7 +50,7 @@
    streamlit run app.py
    ```
 
-## Download datasets and DL model
+## Datasets and DL model
 
 - Climate datasets (`climate_data_land.h5`, `climate_variables.h5`) are placed under the `dataset/` directory. Check the `README.txt` for more details.
 - Model weights are specified in `model.pth`.
