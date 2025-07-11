@@ -105,3 +105,5 @@ This project is licensed under the GNU GPLv3 License.
 
 - Data provided by CRU TS, MCD12C1 and GMTED2010.
 - Deep learning and clustering powered by MATLAB and PyTorch. 
+- Web-based visualization powered by Streamlit and Plotly.
+- 
