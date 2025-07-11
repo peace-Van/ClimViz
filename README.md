@@ -87,6 +87,8 @@
 ├── dataset/              # Directory for climate data files
 ├── requirements.txt      # Python dependencies
 └── README.md             # Project documentation
+└── world.png             # Header image: DeepEcoClimate world map for 1995-2024 climate normals
+└── LICENSE               # GNU GPLv3 License
 ```
 
 ## Citation
@@ -95,7 +97,7 @@ If you use DeepEcoClimate or its data in your research, please cite the original
 
 ## License
 
-This project is licensed under the GNU GPLv3 License.
+This project is licensed under the [GNU GPLv3 License](LICENSE).
 
 ## Related Project
 
