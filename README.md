@@ -2,7 +2,7 @@
 
 ![DeepEcoClimate](world.png)
 
-[ClimViz](https://climviz.streamlit.app/) is an interactive web application for exploring global climate data, visualizing climate classifications, and analyzing climate variables and trends. It leverages deep learning, advanced climate indices, and interactive charts to provide a comprehensive climate data exploration experience.
+[ClimViz](https://climviz.streamlit.app/) is an interactive web application for exploring global climate data, visualizing climate classification world maps, and analyzing climate variables and trends. It leverages deep learning, advanced climate indices, and interactive charts to provide a comprehensive climate data exploration experience.
 
 ## Features
 
@@ -108,7 +108,7 @@ This project is licensed under the [GNU GPLv3 License](LICENSE).
 
 ## Acknowledgements
 
-- Data provided by CRU TS, MCD12C1 and GMTED2010.
-- Deep learning and clustering powered by MATLAB and PyTorch. 
-- Web-based visualization powered by Streamlit and Plotly.
+- Data provided by CRU TS, MCD12C1 and GMTED2010
+- Deep learning and clustering powered by MATLAB and PyTorch
+- Web-based visualization powered by Streamlit and Plotly
 
