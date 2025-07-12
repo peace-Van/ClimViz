@@ -60,7 +60,7 @@
     from climate_classification import DLClassification
     model = DLModel('cpu', 'inference')
     model = torch.compile(model)
-    model.load_state_dict(torch.load(_weight_file, map_location=torch.device('cpu')))
+    model.load_state_dict(torch.load('model.pth', map_location=torch.device('cpu')))
     model.eval()
     # data shape: (batch, 3, 12)
     # 3 rows are mean daily minimum temperature (°C), precipitation (mm), mean daily maximum temperature (°C)
