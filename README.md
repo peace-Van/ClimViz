@@ -56,9 +56,12 @@
 - Model weights are specified in `model.pth`.
 - Model usage: 
 ```python
-    from app import get_network
+    from TorchModel import DLModel
     from climate_classification import DLClassification
-    model = get_network('model.pth')
+    model = DLModel('cpu', 'inference')
+    model = torch.compile(model)
+    model.load_state_dict(torch.load(_weight_file, map_location=torch.device('cpu')))
+    model.eval()
     # data shape: (batch, 3, 12)
     # 3 rows are mean daily minimum temperature (°C), precipitation (mm), mean daily maximum temperature (°C)
     # 12 columns are 12 months
