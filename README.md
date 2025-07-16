@@ -1,6 +1,8 @@
 # ClimViz - World Climate Explorer
 
-![DeepEcoClimate](world.png)
+![DeepEcoClimateLogo](logo.png)
+
+![DeepEcoClimateMap](world.png)
 
 [ClimViz](https://climviz.streamlit.app/) is an interactive web application for exploring global climate data, visualizing climate classification world maps, and analyzing climate variables and trends. It leverages deep learning, advanced climate indices, and interactive charts to provide a comprehensive climate data exploration experience.
 
@@ -19,6 +21,7 @@
 - Climate normals [CRU TS v4.09](https://crudata.uea.ac.uk/cru/data/hrg/)
 - Land cover [MCD12C1](https://www.earthdata.nasa.gov/data/catalog/lpcloud-mcd12c1-061)
 - Elevation [GMTED2010](https://www.usgs.gov/centers/eros/science/usgs-eros-archive-digital-elevation-global-multi-resolution-terrain-elevation)
+- For the compiled dataset, see [here](https://data.mendeley.com/datasets/dnk6839b86/1)
 
 ## Deploy Locally
 
@@ -50,11 +53,8 @@
    streamlit run app.py
    ```
 
-## Datasets and DL model
+## DeepEcoClimate deep learning model usage
 
-- Climate datasets (`climate_data_land.h5`, `climate_variables.h5`) are placed under the `dataset/` directory. Check the `README.txt` for more details.
-- Model weights are specified in `model.pth`.
-- Model usage: 
 ```python
     from TorchModel import DLModel
     from climate_classification import DLClassification
@@ -87,7 +87,6 @@
 ├── TorchModel.py         # Deep learning model definition
 ├── structured_kmeans.py  # Structured KMeans clustering
 ├── climate_classification.py # Climate classification logic for Köppen-Geiger, Trewartha and DeepEcoClimate
-├── dataset/              # Directory for climate data files
 ├── requirements.txt      # Python dependencies
 └── README.md             # Project documentation
 └── world.png             # Header image: DeepEcoClimate world map for 1995-2024 climate normals
@@ -96,7 +95,7 @@
 
 ## Citation
 
-If you use DeepEcoClimate or its data in your research, please cite the original data sources and this repo and/or [ClimCalc](https://github.com/peace-Van/ClimCalc/tree/main) repo.
+If you use DeepEcoClimate in your research, please cite this repo and/or [ClimCalc](https://github.com/peace-Van/ClimCalc/tree/main) repo.
 
 ## License
 

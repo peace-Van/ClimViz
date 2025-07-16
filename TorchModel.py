@@ -385,7 +385,7 @@ if __name__ == "__main__":
 
     best_model.linear = remove_parametrizations(best_model.linear, 'weight')
     best_model.linear1 = remove_parametrizations(best_model.linear1, 'weight')
-    torch.save(best_model, "best_model.pth")
+    torch.save(best_model, "model.pth")
         
     model.mode = 'inference'
     model.eval()
