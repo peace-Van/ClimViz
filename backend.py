@@ -289,8 +289,12 @@ class ClimateDataset:
             values = self.get_total_pr(unit)
         elif map_type == "Aridity Index":
             values = self.get_aridity_index()
+        elif map_type == "Aridity Index (Discretized)":
+            values = discretize_aridity_index(self.get_aridity_index())
         elif map_type == "Thermal Index":
             values = self.get_thermal_index()
+        elif map_type == "Thermal Index (Discretized)":
+            values = discretize_thermal_index(self.get_thermal_index())
         elif map_type == "Coldest Month Mean Temperature":
             values = self.get_coldest_month_tmp(unit)
         elif map_type == "Hottest Month Mean Temperature":
@@ -805,3 +809,19 @@ def create_probability_chart(
     )
 
     return fig
+
+
+def discretize_thermal_index(arr):
+    arr = np.asarray(arr)
+    bins = np.array([-np.inf, -1, 0, 1, np.inf])
+    labels = ['cold', 'cool temperate', 'warm temperate', 'hot']
+    inds = np.digitize(arr, bins) - 1
+    return np.array([labels[i] for i in inds])
+
+
+def discretize_aridity_index(arr):
+    arr = np.asarray(arr)
+    bins = np.array([-np.inf, -1, 0, 1, np.inf])
+    labels = ['humid', 'sub-humid', 'semi-arid', 'arid']
+    inds = np.digitize(arr, bins) - 1
+    return np.array([labels[i] for i in inds])
