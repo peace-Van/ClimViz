@@ -191,7 +191,7 @@ def load_resources() -> tuple[h5py.File, np.ndarray, np.ndarray, h5py.File, Loca
 def load_default_data(
     _data_file: h5py.File, _indices: np.ndarray, _elev: np.ndarray, _network: DLModel
 ) -> ClimateDataset:
-    return calc_climate_normals(90, 30, _data_file, _indices, _elev, _network)
+    return calc_climate_normals(94, 30, _data_file, _indices, _elev, _network)
 
 
 def calc_climate_normals(
@@ -336,7 +336,7 @@ if __name__ == "__main__":
         st.session_state["fig"] = None
 
     if "year_range" not in st.session_state:
-        st.session_state["year_range"] = (1991, 2020)
+        st.session_state["year_range"] = (1995, 2024)
 
     if "selected_points" not in st.session_state:
         st.session_state["selected_points"] = {}
@@ -591,7 +591,7 @@ if __name__ == "__main__":
             st.session_state["year_range"][1] - st.session_state["year_range"][0] + 1
         )
 
-        if start_year_ == 90 and years == 30:
+        if start_year_ == 94 and years == 30:
             st.session_state["climate_data"] = default_data
         elif st.session_state["year_range_changed"]:
             with st.spinner("Calculating..."):
