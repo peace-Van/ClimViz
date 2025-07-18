@@ -34,7 +34,9 @@ MAP_TYPES = {
     ],
     "Variable": [
         "Thermal Index",
+        "Thermal Index (Discretized)", 
         "Aridity Index",
+        "Aridity Index (Discretized)", 
         "Annual Mean Temperature",
         "Annual Total Precipitation",
         "Coldest Month Mean Temperature",
@@ -153,7 +155,19 @@ COLOR_SCHEMES = {
     "Annual Mean Temperature": "Portland",
     "Annual Total Precipitation": "Earth",
     "Aridity Index": "Geyser",
+    "Aridity Index (Discretized)": {
+        "humid": "rgb(0, 128, 128)",
+        "sub-humid": "rgb(112, 164, 148)",
+        "semi-arid": "rgb(246, 237, 189)",
+        "arid": "rgb(202, 86, 44)",
+    },
     "Thermal Index": "balance",
+    "Thermal Index (Discretized)": {
+        "cold": "rgb(41, 58, 143)",
+        "cool temperate": "rgb(69, 144, 185)",
+        "warm temperate": "rgb(230, 210, 204)",
+        "hot": "rgb(172, 43, 36)",
+    },
     "Coldest Month Mean Temperature": "delta",
     "Hottest Month Mean Temperature": "Temps",
     "Wettest Month Precipitation": "deep",
@@ -369,7 +383,7 @@ if __name__ == "__main__":
             on_change=sync_settings_changed,
         )
 
-        if st.session_state["cat_val"] == "Variable":
+        if st.session_state["cat_val"] == "Variable" and "Discretized" not in st.session_state["map_type"]:
             st.toggle(
                 "Annual Change Rate",
                 value=False,
@@ -560,7 +574,7 @@ if __name__ == "__main__":
         #     )
         st.markdown(
             """
-            Data source: [CRU TS v4.09](https://crudata.uea.ac.uk/cru/data/hrg/), [GMTED2010](https://www.usgs.gov/centers/eros/science/usgs-eros-archive-digital-elevation-global-multi-resolution-terrain-elevation)
+            Data source: [CRU TS v4.09](https://crudata.uea.ac.uk/cru/data/hrg/)
             """
         )
 
@@ -667,40 +681,101 @@ if __name__ == "__main__":
                 )
             )
         else:
-            fig = px.scatter_geo(
-                df,
-                lat="lat",
-                lon="lon",
-                color="value",
-                color_continuous_scale=COLOR_SCHEMES[st.session_state["map_type"]],
-                range_color=RANGES[st.session_state["map_type"]][
-                    st.session_state["change_rate"]
-                ][st.session_state["unit"]],
-                hover_data={"elev": True, "value": True},
-                opacity=0.8,
-            )
-
-            fig.update_traces(
-                hovertemplate=(
-                    # "point index: %{pointIndex}<br>" +
-                    "lat: %{lat:.2f}<br>"
-                    + "lon: %{lon:.2f}<br>"
-                    + "elev: %{customdata[0]:.0f}m<br>"
-                    + "value: %{customdata[1]:.2f}<br>"
-                    + "<extra></extra>"
+            if st.session_state["map_type"] == "Thermal Index (Discretized)":
+                fig = px.scatter_geo(
+                    df,
+                    lat="lat",
+                    lon="lon",
+                    color="value",
+                    color_discrete_map=COLOR_SCHEMES["Thermal Index (Discretized)"],
+                    hover_data={"elev": True, "value": True},
+                    opacity=0.8,
+                    category_orders={"value": ["cold", "cool temperate", "warm temperate", "hot"]},
                 )
-            )
-            # update the legend style
-            fig.update_layout(
-                coloraxis_colorbar=dict(
-                    title="",
-                    tickfont=dict(size=15),
-                ),
-                legend=dict(
-                    yanchor="bottom",
-                    y=0.01,
-                ),
-            )
+                fig.update_traces(
+                    hovertemplate=(
+                        "lat: %{lat:.2f}<br>"
+                        + "lon: %{lon:.2f}<br>"
+                        + "elev: %{customdata[0]:.0f}m<br>"
+                        + "type: %{customdata[1]}<br>"
+                        + "<extra></extra>"
+                    )
+                )
+                fig.update_layout(
+                    legend=dict(
+                        title="",
+                        itemsizing="constant",
+                        font=dict(size=15),
+                        yanchor="bottom",
+                        y=0.01,
+                    ),
+                    coloraxis_showscale=False,
+                )
+            elif st.session_state["map_type"] == "Aridity Index (Discretized)":
+                fig = px.scatter_geo(
+                    df,
+                    lat="lat",
+                    lon="lon",
+                    color="value",
+                    color_discrete_map=COLOR_SCHEMES["Aridity Index (Discretized)"],
+                    hover_data={"elev": True, "value": True},
+                    opacity=0.8,
+                    category_orders={"value": ["humid", "sub-humid", "semi-arid", "arid"]},
+                )
+                fig.update_traces(
+                    hovertemplate=(
+                        "lat: %{lat:.2f}<br>"
+                        + "lon: %{lon:.2f}<br>"
+                        + "elev: %{customdata[0]:.0f}m<br>"
+                        + "type: %{customdata[1]}<br>"
+                        + "<extra></extra>"
+                    )
+                )
+                fig.update_layout(
+                    legend=dict(
+                        title="",
+                        itemsizing="constant",
+                        font=dict(size=15),
+                        yanchor="bottom",
+                        y=0.01,
+                    ),
+                    coloraxis_showscale=False,
+                )
+            else:
+                fig = px.scatter_geo(
+                    df,
+                    lat="lat",
+                    lon="lon",
+                    color="value",
+                    color_continuous_scale=COLOR_SCHEMES[st.session_state["map_type"]],
+                    range_color=RANGES[st.session_state["map_type"]][
+                        st.session_state["change_rate"]
+                    ][st.session_state["unit"]],
+                    hover_data={"elev": True, "value": True},
+                    opacity=0.8,
+                )
+
+                fig.update_traces(
+                    hovertemplate=(
+                        # "point index: %{pointIndex}<br>" +
+                        "lat: %{lat:.2f}<br>"
+                        + "lon: %{lon:.2f}<br>"
+                        + "elev: %{customdata[0]:.0f}m<br>"
+                        + "value: %{customdata[1]:.2f}<br>"
+                        + "<extra></extra>"
+                    )
+                )
+                # update the legend style
+                fig.update_layout(
+                    coloraxis_colorbar=dict(
+                        title="",
+                        tickfont=dict(size=15),
+                    ),
+                    legend=dict(
+                        yanchor="bottom",
+                        y=0.01,
+                    ),
+                )
 
         fig.update_geos(
             projection_type="equirectangular",  # equirectangular projection
@@ -886,7 +961,7 @@ if __name__ == "__main__":
                                         file_name=f"{title} ({elev_:.0f}m).csv",
                                         mime="text/csv",
                                         icon=":material/download:",
-                                        help="All downloaded data use &deg;C/mm unit. For full dataset download, please go to [GitHub repo](https://github.com/peace-Van/ClimViz/tree/main/dataset).",
+                                        help="All downloaded data use &deg;C/mm unit. For full dataset download, please see [here](https://data.mendeley.com/datasets/dnk6839b86/1).",
                                         use_container_width=True,
                                     )
 
