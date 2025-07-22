@@ -14,6 +14,7 @@ import h5py
 from TorchModel import DLModel
 from numba import njit
 from functools import lru_cache
+from matplotlib.colors import to_rgb
 
 
 LATEST_YEAR = 2024
@@ -55,6 +56,11 @@ def celcius_to_fahrenheit(temp: np.ndarray) -> np.ndarray:
 @njit
 def mm_to_inch(prec: np.ndarray) -> np.ndarray:
     return prec / np.float32(25.4)
+
+
+def lighten(color, amount):
+    c = np.array(to_rgb(color))
+    return tuple(1 - amount * (1 - c))
 
 
 @njit
@@ -268,6 +274,7 @@ class ClimateDataset:
         koppen_cd_mode: str = "",
         koppen_kh_mode: str = "",
         unit: bool = False,
+        class_name: str = "Af",
     ) -> pd.DataFrame:
         values = []
 
@@ -283,6 +290,36 @@ class ClimateDataset:
             values = self.get_trewartha()
         elif map_type == "DeepEcoClimate":
             values = self.get_dl()
+        # elif map_type == "Dm probability":
+        #     # Find index of 'Dm' in DLClassification.class_map
+        #     from climate_classification import DLClassification
+        #     dm_idx = DLClassification.class_map.index('Dm')
+        #     # self.probabilities shape: (n, 26)
+        #     probs = self.probabilities[:, dm_idx]
+        #     # Only keep points with prob > 0.01
+        #     lats, lons = zip(*self.data.keys())
+        #     elevs = [v.elev for v in self.data.values()]
+        #     df = pd.DataFrame({
+        #         'lat': lats,
+        #         'lon': lons,
+        #         'value': probs,
+        #         'elev': elevs,
+        #     })
+        #     df = df[df['value'] > 0.01].reset_index(drop=True)
+        #     return df
+        elif map_type == "DeepEcoClimate Class Probability":
+            class_idx = DLClassification.class_map.index(class_name)
+            probs = self.probabilities[:, class_idx]
+            lats, lons = zip(*self.data.keys())
+            elevs = [v.elev for v in self.data.values()]
+            df = pd.DataFrame({
+                'lat': lats,
+                'lon': lons,
+                'value': probs,
+                'elev': elevs,
+            })
+            df = df[df['value'] >= 0.02].reset_index(drop=True)
+            return df
         elif map_type == "Annual Mean Temperature":
             values = self.get_mean_temp(unit)
         elif map_type == "Annual Total Precipitation":
