@@ -14,6 +14,7 @@ from backend import (
     create_probability_chart,
     VARIABLE_TYPE_INDICES,
     LATEST_YEAR,
+    lighten, 
 )
 import h5py
 from climate_classification import (
@@ -33,6 +34,7 @@ MAP_TYPES = {
         "Trewartha Classification",
     ],
     "Variable": [
+        "DeepEcoClimate Class Probability",
         "Thermal Index",
         "Thermal Index (Discretized)", 
         "Aridity Index",
@@ -383,7 +385,16 @@ if __name__ == "__main__":
             on_change=sync_settings_changed,
         )
 
-        if st.session_state["cat_val"] == "Variable" and "Discretized" not in st.session_state["map_type"]:
+        if st.session_state["map_type"] == "DeepEcoClimate Class Probability":
+            st.selectbox(
+                "Select climate type", 
+                DLClassification.order,  
+                index=0, 
+                key="selected_class", 
+                on_change=sync_settings_changed,
+            )
+
+        elif st.session_state["cat_val"] == "Variable" and "Discretized" not in st.session_state["map_type"]:
             st.toggle(
                 "Annual Change Rate",
                 value=False,
@@ -497,8 +508,20 @@ if __name__ == "__main__":
         if st.session_state["settings_changed"]:
             st.info("Click Update Map to apply new settings")
 
-        st.toggle("Plot global trend", value=False, key="show_global_trend", help="This applies only when no points are selected on the map")
-        st.toggle("Plot class probability", value=False, key="show_probability", help="This applies only when DeepEcoClimate is selected and there are points selected on the map")
+        st.toggle(
+            "Plot global trend", 
+            value=False, 
+            key="show_global_trend", 
+            help="This applies only when no points are selected on the map", 
+            # disabled=len(st.session_state["selected_points"]) > 0, 
+            )
+        st.toggle(
+            "Plot class probability for locations", 
+            value=False, 
+            key="show_probability", 
+            help="This applies only when DeepEcoClimate is selected and there are points selected on the map", 
+            # disabled=len(st.session_state["selected_points"]) == 0 or "DeepEcoClimate" not in st.session_state["map_type"], 
+            )
         if st.session_state["map_type"] in [
             "Annual Mean Temperature",
             "Annual Total Precipitation",
@@ -741,6 +764,40 @@ if __name__ == "__main__":
                     ),
                     coloraxis_showscale=False,
                 )
+            elif st.session_state["map_type"] == "DeepEcoClimate Class Probability":
+                class_name = st.session_state["selected_class"]
+                df = st.session_state["climate_data"].prepare_map_data("DeepEcoClimate Class Probability", class_name=class_name)
+                main_color = DLClassification.color_map[class_name]
+                light_color = '#%02x%02x%02x' % tuple(int(x*255) for x in lighten(main_color, 0.02))
+                fig = px.scatter_geo(
+                    df,
+                    lat="lat",
+                    lon="lon",
+                    color="value",
+                    color_continuous_scale=[(0, light_color), (1, main_color)],
+                    range_color=(0, 1),
+                    hover_data={"elev": True, "value": True},
+                    opacity=0.8,
+                )
+                fig.update_traces(
+                    hovertemplate=(
+                        "lat: %{lat:.2f}<br>"
+                        + "lon: %{lon:.2f}<br>"
+                        + "elev: %{customdata[0]:.0f}m<br>"
+                        + f"{class_name} probability: %{{customdata[1]:.2f}}<br>"
+                        + "<extra></extra>"
+                    )
+                )
+                fig.update_layout(
+                    coloraxis_colorbar=dict(
+                        title=f"{class_name} probability",
+                        tickfont=dict(size=15),
+                    ),
+                    legend=dict(
+                        yanchor="bottom",
+                        y=0.01,
+                    ),
+                )
             else:
                 fig = px.scatter_geo(
                     df,
@@ -896,7 +953,7 @@ if __name__ == "__main__":
                             if not st.session_state["change_rate"]:
                                 title = locationService.get_location_info(point_location, st.session_state[f"local_lang_{i}"])
 
-                                if st.session_state["show_probability"] and st.session_state["map_type"] == "DeepEcoClimate":
+                                if st.session_state["show_probability"] and "DeepEcoClimate" in st.session_state["map_type"]:
                                     # print(st.session_state["climate_data"].data[point_location].get_dl_data())
                                     idx = np.where(
                                         (indices[:, 0] == point_location[0])

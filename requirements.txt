@@ -47,6 +47,7 @@ jsonschema-specifications==2024.10.1
     # via jsonschema
 llvmlite==0.43.0
     # via numba
+matplotlib==3.10.3
 markdown-it-py==3.0.0
     # via rich
 markupsafe==3.0.2
