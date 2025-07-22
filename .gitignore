@@ -52,3 +52,4 @@ spec.txt
 best_model_.pth
 moving_pca.py
 predict.py
+model_.pth

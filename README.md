@@ -21,7 +21,7 @@
 - Climate normals [CRU TS v4.09](https://crudata.uea.ac.uk/cru/data/hrg/)
 - Land cover [MCD12C1](https://www.earthdata.nasa.gov/data/catalog/lpcloud-mcd12c1-061)
 - Elevation [GMTED2010](https://www.usgs.gov/centers/eros/science/usgs-eros-archive-digital-elevation-global-multi-resolution-terrain-elevation)
-- For the compiled dataset, see [here](https://data.mendeley.com/datasets/dnk6839b86/1)
+- For the compiled dataset, see [here](https://data.mendeley.com/datasets/dnk6839b86/2)
 
 ## Deploy Locally
 
@@ -89,6 +89,7 @@
 ├── climate_classification.py # Climate classification logic for Köppen-Geiger, Trewartha and DeepEcoClimate
 ├── requirements.txt      # Python dependencies
 └── README.md             # Project documentation
+└── model.pth             # Trained DeepEcoClimate model weights
 └── world.png             # Header image: DeepEcoClimate world map for 1995-2024 climate normals
 └── LICENSE               # GNU GPLv3 License
 ```
