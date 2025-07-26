@@ -1100,7 +1100,7 @@ if __name__ == "__main__":
                                 )
                                 st.plotly_chart(fig, use_container_width=True)
 
-                case "DeepEcoClimate":
+                case "DeepEcoClimate" | "DeepEcoClimate Class Probability":
                     cols = st.columns(3)
                     with cols[0]:
                         with st.empty():
