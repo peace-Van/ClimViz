@@ -720,7 +720,7 @@ if __name__ == "__main__":
                         "lat: %{lat:.2f}<br>"
                         + "lon: %{lon:.2f}<br>"
                         + "elev: %{customdata[0]:.0f}m<br>"
-                        + "type: %{customdata[1]}<br>"
+                        + "zone: %{customdata[1]}<br>"
                         + "<extra></extra>"
                     )
                 )
@@ -750,7 +750,7 @@ if __name__ == "__main__":
                         "lat: %{lat:.2f}<br>"
                         + "lon: %{lon:.2f}<br>"
                         + "elev: %{customdata[0]:.0f}m<br>"
-                        + "type: %{customdata[1]}<br>"
+                        + "zone: %{customdata[1]}<br>"
                         + "<extra></extra>"
                     )
                 )
