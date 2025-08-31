@@ -161,8 +161,6 @@ tenacity==9.0.0
     #   streamlit
 toml==0.10.2
     # via streamlit
-torch==2.7.0+cpu
-    # via -r requirements.in
 tornado==6.4.2
     # via streamlit
 # triton==3.3.0
@@ -178,6 +176,10 @@ urllib3==2.2.3
     # via requests
 watchdog==6.0.0
     # via streamlit
+
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.7.0
+    # via -r requirements.in
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
