@@ -39,6 +39,7 @@ MAP_TYPES = {
         "Thermal Index (Discretized)", 
         "Aridity Index",
         "Aridity Index (Discretized)", 
+        "Elevation",
         "Annual Mean Temperature",
         "Annual Total Precipitation",
         "Coldest Month Mean Temperature",
@@ -151,6 +152,16 @@ RANGES = {
             (-0.4, 0.4),  # change rate in degree Fahrenheit
         ],
     ],
+    "Elevation": [
+        [
+            (0, 5000),  # value in meters
+            (0, 5000),  # duplicate to satisfy unit index
+        ],
+        [
+            (0, 5000),  # not used (no change rate), keep structure consistent
+            (0, 5000),
+        ],
+    ],
 }
 
 COLOR_SCHEMES = {
@@ -176,6 +187,7 @@ COLOR_SCHEMES = {
     "Driest Month Precipitation": "speed",
     "Coldest Month Mean Daily Minimum": "delta",
     "Hottest Month Mean Daily Maximum": "Temps",
+    "Elevation": "Cividis",
 }
 
 
@@ -394,7 +406,11 @@ if __name__ == "__main__":
                 on_change=sync_settings_changed,
             )
 
-        elif st.session_state["cat_val"] == "Variable" and "Discretized" not in st.session_state["map_type"]:
+        elif (
+            st.session_state["cat_val"] == "Variable"
+            and "Discretized" not in st.session_state["map_type"]
+            and st.session_state["map_type"] != "Elevation"
+        ):
             st.toggle(
                 "Annual Change Rate",
                 value=False,
@@ -444,6 +460,7 @@ if __name__ == "__main__":
                 max_value=LATEST_YEAR,
                 value=st.session_state["year_range"][0],
                 key="start_year",
+                disabled=st.session_state["map_type"] == "Elevation",
                 on_change=sync_number_input,
                 help="Press Enter to apply",
             )
@@ -455,6 +472,7 @@ if __name__ == "__main__":
                 max_value=LATEST_YEAR,
                 value=st.session_state["year_range"][1],
                 key="end_year",
+                disabled=st.session_state["map_type"] == "Elevation",
                 on_change=sync_number_input,
                 help="Press Enter to apply",
             )
@@ -467,6 +485,7 @@ if __name__ == "__main__":
             value=st.session_state["year_range"],
             on_change=sync_slider,
             label_visibility="collapsed",
+            disabled=st.session_state["map_type"] == "Elevation",
         )
 
         st.session_state["year_range"] = st.session_state["year_slider"]
@@ -642,7 +661,7 @@ if __name__ == "__main__":
                             st.session_state["map_type"]
                         )
             else:
-                if st.session_state["change_rate"]:
+                if st.session_state["change_rate"] and st.session_state["map_type"] != "Elevation":
                     df = calc_change_rate(
                         variable_file,
                         indices,

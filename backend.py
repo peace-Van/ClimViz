@@ -346,6 +346,8 @@ class ClimateDataset:
             values = self.get_driest_month_pre(unit)
         elif map_type == "Wettest Month Precipitation":
             values = self.get_wettest_month_pre(unit)
+        elif map_type == "Elevation":
+            values = [v.elev for v in self.data.values()]
 
         lats, lons = zip(*self.data.keys())
 
