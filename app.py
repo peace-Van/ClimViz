@@ -152,16 +152,6 @@ RANGES = {
             (-0.4, 0.4),  # change rate in degree Fahrenheit
         ],
     ],
-    "Elevation": [
-        [
-            (0, 5000),  # value in meters
-            (0, 5000),  # duplicate to satisfy unit index
-        ],
-        [
-            (0, 5000),  # not used (no change rate), keep structure consistent
-            (0, 5000),
-        ],
-    ],
 }
 
 COLOR_SCHEMES = {
@@ -415,6 +405,21 @@ if __name__ == "__main__":
                 "Annual Change Rate",
                 value=False,
                 key="change_rate",
+                on_change=sync_settings_changed,
+            )
+
+        # Elevation max range control
+        if (
+            st.session_state["cat_val"] == "Variable"
+            and st.session_state["map_type"] == "Elevation"
+        ):
+            st.slider(
+                "Max elevation (m)",
+                min_value=1000,
+                max_value=5500,
+                step=500,
+                value=5000,
+                key="elev_max",
                 on_change=sync_settings_changed,
             )
 
@@ -818,18 +823,32 @@ if __name__ == "__main__":
                     ),
                 )
             else:
-                fig = px.scatter_geo(
-                    df,
-                    lat="lat",
-                    lon="lon",
-                    color="value",
-                    color_continuous_scale=COLOR_SCHEMES[st.session_state["map_type"]],
-                    range_color=RANGES[st.session_state["map_type"]][
-                        st.session_state["change_rate"]
-                    ][st.session_state["unit"]],
-                    hover_data={"elev": True, "value": True},
-                    opacity=0.8,
-                )
+                if st.session_state["map_type"] == "Elevation":
+                    # Apply user-defined max range for elevation
+                    elev_max = st.session_state.get("elev_max", 5000)
+                    fig = px.scatter_geo(
+                        df,
+                        lat="lat",
+                        lon="lon",
+                        color="value",
+                        color_continuous_scale=COLOR_SCHEMES[st.session_state["map_type"]],
+                        range_color=(0, elev_max),
+                        hover_data={"elev": True, "value": True},
+                        opacity=0.8,
+                    )
+                else:
+                    fig = px.scatter_geo(
+                        df,
+                        lat="lat",
+                        lon="lon",
+                        color="value",
+                        color_continuous_scale=COLOR_SCHEMES[st.session_state["map_type"]],
+                        range_color=RANGES[st.session_state["map_type"]][
+                            st.session_state["change_rate"]
+                        ][st.session_state["unit"]],
+                        hover_data={"elev": True, "value": True},
+                        opacity=0.8,
+                    )
 
                 fig.update_traces(
                     hovertemplate=(
