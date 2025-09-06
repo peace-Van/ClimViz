@@ -8,7 +8,7 @@ from climate_classification import (
 )
 import plotly.graph_objects as go
 from geopy.geocoders import Nominatim
-from geopy.exc import GeocoderTimedOut, GeocoderUnavailable
+from geopy.exc import GeocoderTimedOut, GeocoderUnavailable, GeocoderServiceError
 import time
 import h5py
 from TorchModel import DLModel
@@ -406,9 +406,28 @@ def get_average(
 
 class LocationService:
     def __init__(self, user_agent: str = "climate_viz"):
-        self.geolocator = Nominatim(user_agent=user_agent)
-        self.max_retries = 3
-        self.retry_delay = 1
+        # Use a more specific user agent for better compatibility
+        user_agent = f"ClimViz_Climate_Explorer/1.0 ({user_agent})"
+        
+        # Try multiple geocoding services for better reliability
+        self.geocoders = []
+        
+        # Primary: Nominatim (free, no API key required)
+        try:
+            nominatim = Nominatim(
+                user_agent=user_agent,
+                timeout=10,
+                scheme='https'
+            )
+            self.geocoders.append(("Nominatim", nominatim))
+        except Exception as e:
+            print(f"Failed to initialize Nominatim: {e}")
+        
+        # Note: GoogleV3 requires API key, so we'll skip it for now
+        # You can add it later if you have a Google Maps API key
+        
+        self.max_retries = 3  # Reduce retries per service
+        self.retry_delay = 1  # Reduce delay
 
     @lru_cache(maxsize=1000)
     def get_location_info(self, location: tuple[float, float], local_lang: bool = False) -> str:
@@ -422,27 +441,38 @@ class LocationService:
         Returns:
             string containing location information
         """
-        for attempt in range(self.max_retries):
-            try:
-                location_info = self.geolocator.reverse(
-                    location, 
-                    language="en" if not local_lang else False, 
-                    zoom=10,
-                )
-                
-                if location_info and location_info.raw.get("address"):
-                    return location_info.address
+        if not self.geocoders:
+            return "No geocoding services available"
+        
+        for service_name, geocoder in self.geocoders:
+            for attempt in range(self.max_retries):
+                try:
+                    # Add exponential backoff
+                    if attempt > 0:
+                        time.sleep(self.retry_delay * (2 ** attempt))
                     
-                if attempt < self.max_retries - 1:
-                    time.sleep(self.retry_delay)
+                    location_info = geocoder.reverse(
+                        location, 
+                        language="en" if not local_lang else False, 
+                        zoom=10,
+                        exactly_one=True,
+                        timeout=10
+                    )
                     
-            except (GeocoderTimedOut, GeocoderUnavailable):
-                if attempt < self.max_retries - 1:
-                    time.sleep(self.retry_delay)
-                continue
-            except Exception as e:
-                print(f"Unexpected error: {e}")
-                
+                    if location_info and hasattr(location_info, 'raw') and location_info.raw.get("address"):
+                        return location_info.address
+                        
+                except (GeocoderTimedOut, GeocoderUnavailable, GeocoderServiceError) as e:
+                    print(f"{service_name} error (attempt {attempt + 1}): {e}")
+                    if attempt == self.max_retries - 1:
+                        break  # Try next service
+                    continue
+                except Exception as e:
+                    print(f"{service_name} unexpected error (attempt {attempt + 1}): {e}")
+                    if attempt == self.max_retries - 1:
+                        break  # Try next service
+                    continue
+                    
         return "Unknown Location"
 
     @lru_cache(maxsize=1000)
@@ -456,32 +486,46 @@ class LocationService:
         Returns:
             coordinates (lat, lon) or None
         """
-        for attempt in range(self.max_retries):
-            try:
-                location = self.geolocator.geocode(query)
-                if location:
-                    # round to the nearest 0.25 degree or 0.75 degree
-                    lat = location.latitude
-                    lon = location.longitude
-                    # round to 0.5 degree first
-                    lat_rounded = round(lat * 2) / 2
-                    lon_rounded = round(lon * 2) / 2
-
-                    lat_rounded = lat_rounded + 0.25 if lat >= lat_rounded else lat_rounded - 0.25
-                    lon_rounded = lon_rounded + 0.25 if lon >= lon_rounded else lon_rounded - 0.25
-
-                    return (lat_rounded, lon_rounded)
+        if not self.geocoders:
+            return None
+        
+        for service_name, geocoder in self.geocoders:
+            for attempt in range(self.max_retries):
+                try:
+                    # Add exponential backoff
+                    if attempt > 0:
+                        time.sleep(self.retry_delay * (2 ** attempt))
                     
-                if attempt < self.max_retries - 1:
-                    time.sleep(self.retry_delay)
+                    location = geocoder.geocode(
+                        query, 
+                        exactly_one=True, 
+                        timeout=10,
+                        language='en'
+                    )
+                    if location:
+                        # round to the nearest 0.25 degree or 0.75 degree
+                        lat = location.latitude
+                        lon = location.longitude
+                        # round to 0.5 degree first
+                        lat_rounded = round(lat * 2) / 2
+                        lon_rounded = round(lon * 2) / 2
+
+                        lat_rounded = lat_rounded + 0.25 if lat >= lat_rounded else lat_rounded - 0.25
+                        lon_rounded = lon_rounded + 0.25 if lon >= lon_rounded else lon_rounded - 0.25
+
+                        return (lat_rounded, lon_rounded)
+                        
+                except (GeocoderTimedOut, GeocoderUnavailable, GeocoderServiceError) as e:
+                    print(f"{service_name} search error (attempt {attempt + 1}): {e}")
+                    if attempt == self.max_retries - 1:
+                        break  # Try next service
+                    continue
+                except Exception as e:
+                    print(f"{service_name} unexpected search error (attempt {attempt + 1}): {e}")
+                    if attempt == self.max_retries - 1:
+                        break  # Try next service
+                    continue
                     
-            except (GeocoderTimedOut, GeocoderUnavailable):
-                if attempt < self.max_retries - 1:
-                    time.sleep(self.retry_delay)
-                continue
-            except Exception as e:
-                print(f"Unexpected error: {e}")
-                
         return None
 
 
