@@ -26,8 +26,12 @@ async function wakeUpStreamlitApp() {
       timeout: 30000
     });
 
-    // Wait a bit for the page to load
-    await page.waitForTimeout(3000);
+    // Wait for the page to load by checking for common elements
+    try {
+      await page.waitForSelector('body', { timeout: 10000 });
+    } catch (error) {
+      console.log('⚠️ Page load timeout, continuing anyway...');
+    }
 
     // Check if the app is sleeping by looking for common sleep indicators
     const isSleeping = await page.evaluate(() => {
@@ -54,12 +58,32 @@ async function wakeUpStreamlitApp() {
       if (wakeUpButton) {
         await wakeUpButton.click();
         console.log('✅ Wake up button clicked');
-        await page.waitForTimeout(5000); // Wait for app to wake up
+        
+        // Wait for the app to wake up by checking if sleep indicators disappear
+        try {
+          await page.waitForFunction(() => {
+            const bodyText = document.body.innerText.toLowerCase();
+            const sleepIndicators = [
+              'your app is sleeping',
+              'app is sleeping',
+              'wake up',
+              'click to wake up',
+              'app is hibernating',
+              'hibernating',
+              'sleeping'
+            ];
+            return !sleepIndicators.some(indicator => bodyText.includes(indicator));
+          }, { timeout: 10000 });
+        } catch (error) {
+          console.log('⚠️ Wake up verification timeout, continuing...');
+        }
       } else {
         // If no specific wake up button, try clicking anywhere on the page
         console.log('No specific wake up button found, trying to click on page...');
         await page.click('body');
-        await page.waitForTimeout(3000);
+        
+        // Wait a moment for any potential response
+        await new Promise(resolve => setTimeout(resolve, 2000));
       }
       
       // Verify if the app is now awake

@@ -55,3 +55,4 @@ predict.py
 model_.pth
 
 node_modules/
+app_status.png
