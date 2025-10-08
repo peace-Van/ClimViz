@@ -47,8 +47,18 @@ schedule:
 - If the app URL changes, update the workflow configuration promptly
 
 ## Troubleshooting
-If the workflow execution fails, check:
+
+### Common Status Codes
+- **200**: App is running normally
+- **303/302**: Redirect response (normal for Streamlit Community Cloud due to authentication)
+- **000**: Network error or app is down
+- **404**: App not found or URL is incorrect
+
+### If the workflow execution fails, check:
 1. Whether the app URL is correct
 2. Whether the app is running normally
 3. Whether the network connection is normal
 4. Whether GitHub Actions is enabled
+
+### About HTTP 303 Status Code
+The 303 status code is **normal** for Streamlit Community Cloud apps. It indicates that the app is running but requires authentication, which causes redirects. The workflow is designed to handle this correctly and will consider 303 responses as successful app access.
