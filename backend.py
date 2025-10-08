@@ -421,7 +421,11 @@ class LocationService:
             raise ValueError("Google Maps API key is required. Set GOOGLE_MAPS_API_KEY environment variable or pass api_key parameter.")
         
         try:
-            self.client = googlemaps.Client(key=api_key)
+            self.client = googlemaps.Client(
+                key=api_key,
+                timeout=10,
+                retry_timeout=60
+            )
             print("Google Maps client initialized successfully")
         except Exception as e:
             print(f"Failed to initialize Google Maps client: {e}")
@@ -431,13 +435,12 @@ class LocationService:
         self.retry_delay = 1
 
     @lru_cache(maxsize=1000)
-    def get_location_info(self, location: tuple[float, float], local_lang: bool = False) -> str:
+    def get_location_info(self, location: tuple[float, float]) -> str:
         """
         get the location information using Google Maps reverse geocoding
         
         Args:
             location: location coordinates (lat, lon)
-            local_lang: whether to use local language
             
         Returns:
             string containing location information
@@ -451,8 +454,8 @@ class LocationService:
                 # Use Google Maps reverse geocoding
                 result = self.client.reverse_geocode(
                     location,
-                    language='en' if not local_lang else None,
-                    result_type=['street_address', 'route', 'locality', 'administrative_area_level_1', 'country']
+                    # language='en',
+                    result_type=['administrative_area_level_2', 'administrative_area_level_1', 'country']
                 )
                 
                 if result and len(result) > 0:

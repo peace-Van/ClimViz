@@ -969,7 +969,7 @@ if __name__ == "__main__":
                         with st.container():
                             download_data = None
                             elev_ = None
-                            col1, col2, col3, col4 = st.columns(4)
+                            col1, col2, col3 = st.columns(3)
                             with col1:
                                 st.checkbox(
                                     "Auto scale axes",
@@ -979,10 +979,6 @@ if __name__ == "__main__":
                                 )
                             with col2:
                                 st.checkbox(
-                                    "Local language", value=False, key=f"local_lang_{i}"
-                                )
-                            with col3:
-                                st.checkbox(
                                     "July first",
                                     value=False,
                                     key=f"july_first_{i}",
@@ -990,7 +986,7 @@ if __name__ == "__main__":
                                 )
 
                             if not st.session_state["change_rate"]:
-                                title = locationService.get_location_info(point_location, st.session_state[f"local_lang_{i}"])
+                                title = locationService.get_location_info(point_location)
 
                                 if st.session_state["show_probability"] and "DeepEcoClimate" in st.session_state["map_type"]:
                                     # print(st.session_state["climate_data"].data[point_location].get_dl_data())
@@ -1063,7 +1059,7 @@ if __name__ == "__main__":
 
                             gc.collect()
 
-                            with col4:
+                            with col3:
                                 if st.button(
                                     "Clear",
                                     key=f"clear_{i}",
