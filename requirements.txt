@@ -24,9 +24,7 @@ filelock==3.18.0
     # via torch
 fsspec==2025.3.2
     # via torch
-geographiclib==2.0
-    # via geopy
-geopy==2.4.1
+googlemaps==4.10.0
     # via -r requirements.in
 gitdb==4.0.11
     # via gitpython
