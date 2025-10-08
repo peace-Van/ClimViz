@@ -497,7 +497,7 @@ class LocationService:
                 # Use Google Maps geocoding
                 result = self.client.geocode(
                     query,
-                    language='en'
+                    # language='en'
                 )
                 
                 if result and len(result) > 0:
