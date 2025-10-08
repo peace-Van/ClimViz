@@ -62,3 +62,11 @@ schedule:
 
 ### About HTTP 303 Status Code
 The 303 status code is **normal** for Streamlit Community Cloud apps. It indicates that the app is running but requires authentication, which causes redirects. The workflow is designed to handle this correctly and will consider 303 responses as successful app access.
+
+### About Exit Code 47
+Exit code 47 typically occurs when curl encounters SSL/TLS issues or infinite redirect loops. The workflow has been updated to:
+- Not follow redirects automatically (avoiding infinite loops)
+- Use appropriate timeout settings
+- Handle redirect responses as successful app access
+
+This ensures the keep-alive function works reliably with Streamlit Community Cloud's authentication system.
