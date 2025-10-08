@@ -626,6 +626,7 @@ if __name__ == "__main__":
         )
 
         st.page_link("https://climcalc.streamlit.app", icon=":material/query_stats:", label="ClimCalc", help="Get the climate type for your location or data")
+        st.page_link("https://www.youtube.com/watch?v=bF0Mck-yqhw", icon=":material/play_circle:", label="YouTube", help="Watch the introduction video")
 
     if submitted or st.session_state["fig"] is None:
         # clean the old chart
