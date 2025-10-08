@@ -12,8 +12,8 @@ jobs:
       - name: Send request to Streamlit app
         run: |
           echo "Accessing Streamlit app to keep it alive..."
-          # Use curl with limited redirects to avoid infinite loops
-          response_code=$(curl -L --max-redirs 5 -s -o /dev/null -w "%{http_code}" https://climviz.streamlit.app/)
+          # Use curl without following redirects to avoid infinite loops
+          response_code=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 30 --max-time 60 https://climviz.streamlit.app/)
           echo "Response status code: $response_code"
           
           if [ $response_code -eq 200 ]; then
