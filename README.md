@@ -6,6 +6,8 @@
 
 [ClimViz](https://climviz.streamlit.app/) is an interactive web application for exploring global climate data, visualizing climate classification world maps, and analyzing climate variables and trends. It leverages deep learning, advanced climate indices, and interactive charts to provide a comprehensive climate data exploration experience.
 
+Learn [more](https://www.youtube.com/watch?v=bF0Mck-yqhw) in this YouTube video.
+
 ## Features
 
 - **Interactive World Map**: Visualize climate classifications (DeepEcoClimate, Köppen-Geiger, Trewartha) and climate variables (temperature, precipitation, aridity, etc.) on a global scale.
