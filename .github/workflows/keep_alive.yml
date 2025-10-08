@@ -1,0 +1,23 @@
+name: Keep Streamlit App Alive
+
+on:
+  schedule:
+    - cron: '0 */8 * * *'  # run every 8 hours
+  workflow_dispatch:  # allow manual trigger
+
+jobs:
+  keep_alive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send request to Streamlit app
+        run: |
+          echo "Accessing Streamlit app to keep it alive..."
+          response_code=$(curl -s -o /dev/null -w "%{http_code}" https://climviz.streamlit.app/)
+          echo "Response status code: $response_code"
+          
+          if [ $response_code -eq 200 ]; then
+            echo "✅ App access successful, keeping it alive"
+          else
+            echo "❌ App access failed, status code: $response_code"
+            exit 1
+          fi
