@@ -9,22 +9,27 @@ jobs:
   keep_alive:
     runs-on: ubuntu-latest
     steps:
-      - name: Send request to Streamlit app
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Wake up Streamlit app
         run: |
-          echo "Accessing Streamlit app to keep it alive..."
-          # Use curl without following redirects to avoid infinite loops
-          response_code=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 30 --max-time 60 https://climviz.streamlit.app/)
-          echo "Response status code: $response_code"
-          
-          if [ $response_code -eq 200 ]; then
-            echo "✅ App access successful, keeping it alive"
-          elif [ $response_code -eq 303 ] || [ $response_code -eq 302 ]; then
-            echo "⚠️ App returned redirect ($response_code), this is normal for Streamlit Community Cloud"
-            echo "✅ App is accessible and keeping alive (redirect indicates app is running)"
-          elif [ $response_code -eq 000 ]; then
-            echo "❌ Network error or app is down"
-            exit 1
-          else
-            echo "⚠️ Unexpected response code: $response_code"
-            echo "✅ App appears to be running (any response indicates the app is active)"
-          fi
+          echo "🤖 Starting intelligent wake-up process..."
+          npm run wake-up
+
+      - name: Upload screenshot (if any)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: app-screenshot
+          path: app_status.png
+          retention-days: 1

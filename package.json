@@ -1,0 +1,24 @@
+{
+  "name": "streamlit-wake-up",
+  "version": "1.0.0",
+  "description": "Automated wake-up script for Streamlit Community Cloud apps",
+  "main": "wake_up_app.js",
+  "scripts": {
+    "wake-up": "node wake_up_app.js",
+    "test": "node wake_up_app.js"
+  },
+  "dependencies": {
+    "puppeteer": "24.23.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "keywords": [
+    "streamlit",
+    "wake-up",
+    "automation",
+    "puppeteer"
+  ],
+  "author": "DeepEcoClimate",
+  "license": "MIT"
+}
