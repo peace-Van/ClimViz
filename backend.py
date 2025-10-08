@@ -7,8 +7,8 @@ from climate_classification import (
     DLClassification,
 )
 import plotly.graph_objects as go
-from geopy.geocoders import Nominatim
-from geopy.exc import GeocoderTimedOut, GeocoderUnavailable, GeocoderServiceError
+import googlemaps
+from googlemaps.exceptions import ApiError, HTTPError, Timeout, TransportError
 import time
 import h5py
 from TorchModel import DLModel
@@ -405,34 +405,35 @@ def get_average(
 
 
 class LocationService:
-    def __init__(self, user_agent: str = "climate_viz"):
-        # Use a more specific user agent for better compatibility
-        user_agent = f"ClimViz_Climate_Explorer/1.0 ({user_agent})"
+    def __init__(self, api_key: str = None):
+        """
+        Initialize Google Maps client
         
-        # Try multiple geocoding services for better reliability
-        self.geocoders = []
+        Args:
+            api_key: Google Maps API key. If None, will try to get from environment variable GOOGLE_MAPS_API_KEY
+        """
+        import os
         
-        # Primary: Nominatim (free, no API key required)
+        if api_key is None:
+            api_key = os.getenv('GOOGLE_MAPS_API_KEY')
+        
+        if not api_key:
+            raise ValueError("Google Maps API key is required. Set GOOGLE_MAPS_API_KEY environment variable or pass api_key parameter.")
+        
         try:
-            nominatim = Nominatim(
-                user_agent=user_agent,
-                timeout=10,
-                scheme='https'
-            )
-            self.geocoders.append(("Nominatim", nominatim))
+            self.client = googlemaps.Client(key=api_key)
+            print("Google Maps client initialized successfully")
         except Exception as e:
-            print(f"Failed to initialize Nominatim: {e}")
+            print(f"Failed to initialize Google Maps client: {e}")
+            raise
         
-        # Note: GoogleV3 requires API key, so we'll skip it for now
-        # You can add it later if you have a Google Maps API key
-        
-        self.max_retries = 3  # Reduce retries per service
-        self.retry_delay = 1  # Reduce delay
+        self.max_retries = 3
+        self.retry_delay = 1
 
     @lru_cache(maxsize=1000)
     def get_location_info(self, location: tuple[float, float], local_lang: bool = False) -> str:
         """
-        get the location information, with cache
+        get the location information using Google Maps reverse geocoding
         
         Args:
             location: location coordinates (lat, lon)
@@ -441,44 +442,42 @@ class LocationService:
         Returns:
             string containing location information
         """
-        if not self.geocoders:
-            return "No geocoding services available"
-        
-        for service_name, geocoder in self.geocoders:
-            for attempt in range(self.max_retries):
-                try:
-                    # Add exponential backoff
-                    if attempt > 0:
-                        time.sleep(self.retry_delay * (2 ** attempt))
-                    
-                    location_info = geocoder.reverse(
-                        location, 
-                        language="en" if not local_lang else False, 
-                        zoom=10,
-                        exactly_one=True,
-                        timeout=10
-                    )
-                    
-                    if location_info and hasattr(location_info, 'raw') and location_info.raw.get("address"):
-                        return location_info.address
+        for attempt in range(self.max_retries):
+            try:
+                # Add exponential backoff
+                if attempt > 0:
+                    time.sleep(self.retry_delay * (2 ** attempt))
+                
+                # Use Google Maps reverse geocoding
+                result = self.client.reverse_geocode(
+                    location,
+                    language='en' if not local_lang else None,
+                    result_type=['street_address', 'route', 'locality', 'administrative_area_level_1', 'country']
+                )
+                
+                if result and len(result) > 0:
+                    # Get the formatted address from the first result
+                    formatted_address = result[0].get('formatted_address', '')
+                    if formatted_address:
+                        return formatted_address
                         
-                except (GeocoderTimedOut, GeocoderUnavailable, GeocoderServiceError) as e:
-                    print(f"{service_name} error (attempt {attempt + 1}): {e}")
-                    if attempt == self.max_retries - 1:
-                        break  # Try next service
-                    continue
-                except Exception as e:
-                    print(f"{service_name} unexpected error (attempt {attempt + 1}): {e}")
-                    if attempt == self.max_retries - 1:
-                        break  # Try next service
-                    continue
-                    
+            except (ApiError, HTTPError, Timeout, TransportError) as e:
+                print(f"Google Maps API error (attempt {attempt + 1}): {e}")
+                if attempt == self.max_retries - 1:
+                    return "Service temporarily unavailable"
+                continue
+            except Exception as e:
+                print(f"Unexpected error (attempt {attempt + 1}): {e}")
+                if attempt == self.max_retries - 1:
+                    return "Location service error"
+                continue
+                
         return "Unknown Location"
 
     @lru_cache(maxsize=1000)
     def search_location(self, query: str) -> tuple[float, float] | None:
         """
-        search location and get the coordinates, with cache
+        search location and get the coordinates using Google Maps geocoding
         
         Args:
             query: location name or address
@@ -486,26 +485,28 @@ class LocationService:
         Returns:
             coordinates (lat, lon) or None
         """
-        if not self.geocoders:
-            return None
-        
-        for service_name, geocoder in self.geocoders:
-            for attempt in range(self.max_retries):
-                try:
-                    # Add exponential backoff
-                    if attempt > 0:
-                        time.sleep(self.retry_delay * (2 ** attempt))
+        for attempt in range(self.max_retries):
+            try:
+                # Add exponential backoff
+                if attempt > 0:
+                    time.sleep(self.retry_delay * (2 ** attempt))
+                
+                # Use Google Maps geocoding
+                result = self.client.geocode(
+                    query,
+                    language='en'
+                )
+                
+                if result and len(result) > 0:
+                    # Get coordinates from the first result
+                    geometry = result[0].get('geometry', {})
+                    location = geometry.get('location', {})
                     
-                    location = geocoder.geocode(
-                        query, 
-                        exactly_one=True, 
-                        timeout=10,
-                        language='en'
-                    )
-                    if location:
+                    if 'lat' in location and 'lng' in location:
+                        lat = location['lat']
+                        lon = location['lng']
+                        
                         # round to the nearest 0.25 degree or 0.75 degree
-                        lat = location.latitude
-                        lon = location.longitude
                         # round to 0.5 degree first
                         lat_rounded = round(lat * 2) / 2
                         lon_rounded = round(lon * 2) / 2
@@ -515,16 +516,16 @@ class LocationService:
 
                         return (lat_rounded, lon_rounded)
                         
-                except (GeocoderTimedOut, GeocoderUnavailable, GeocoderServiceError) as e:
-                    print(f"{service_name} search error (attempt {attempt + 1}): {e}")
-                    if attempt == self.max_retries - 1:
-                        break  # Try next service
-                    continue
-                except Exception as e:
-                    print(f"{service_name} unexpected search error (attempt {attempt + 1}): {e}")
-                    if attempt == self.max_retries - 1:
-                        break  # Try next service
-                    continue
+            except (ApiError, HTTPError, Timeout, TransportError) as e:
+                print(f"Google Maps geocoding error (attempt {attempt + 1}): {e}")
+                if attempt == self.max_retries - 1:
+                    return None
+                continue
+            except Exception as e:
+                print(f"Unexpected geocoding error (attempt {attempt + 1}): {e}")
+                if attempt == self.max_retries - 1:
+                    return None
+                continue
                     
         return None
 

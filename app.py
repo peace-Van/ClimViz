@@ -187,7 +187,7 @@ def load_resources() -> tuple[h5py.File, np.ndarray, np.ndarray, h5py.File, Loca
     indices = data_file.get("indices")[:]
     elev = data_file.get("elev")[:].squeeze()
     variable_file = h5py.File("dataset/climate_variables.h5", "r", swmr=True)
-    locationService = LocationService()
+    locationService = LocationService()  # Will use GOOGLE_MAPS_API_KEY environment variable
     return data_file, indices, elev, variable_file, locationService
 
 
