@@ -12,19 +12,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Python
+        uses: actions/setup-python@v4
         with:
-          node-version: '18'
-          cache: 'npm'
+          python-version: '3.9'
 
       - name: Install dependencies
-        run: npm install
+        run: |
+          pip install -r requirements_wakeup.txt
 
       - name: Wake up Streamlit app
         run: |
           echo "🤖 Starting intelligent wake-up process..."
-          npm run wake-up
+          python wake_up_app.py
 
       - name: Upload screenshot (if any)
         uses: actions/upload-artifact@v4
@@ -32,4 +32,12 @@ jobs:
         with:
           name: app-screenshot
           path: app_status.png
+          retention-days: 1
+
+      - name: Upload error screenshot (if any)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: error-screenshot
+          path: error_screenshot.png
           retention-days: 1

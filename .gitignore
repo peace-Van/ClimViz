@@ -54,5 +54,8 @@ moving_pca.py
 predict.py
 model_.pth
 
+# Wake up app
 node_modules/
+venv/
 app_status.png
+error_screenshot.png
