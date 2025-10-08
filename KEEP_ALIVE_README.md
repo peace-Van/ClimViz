@@ -27,19 +27,26 @@ await page.goto('https://your-app-url.streamlit.app/', {
 Replace `https://your-app-url.streamlit.app` with your actual app URL.
 
 ### 4. How the Intelligent Wake-Up Works
-The system uses the following process:
+The system uses the following modern Puppeteer process:
 
-1. **Launch Headless Browser**: Starts a Puppeteer-controlled browser
-2. **Navigate to App**: Visits your Streamlit app URL
-3. **Detect Sleep State**: Scans page content for sleep indicators like:
+1. **Launch Headless Browser**: Starts a Puppeteer-controlled browser with optimized settings
+2. **Navigate to App**: Visits your Streamlit app URL with `networkidle2` wait condition
+3. **Wait for Page Load**: Uses `waitForSelector()` to ensure page is ready
+4. **Detect Sleep State**: Scans page content for sleep indicators like:
    - "Your app is sleeping"
    - "Wake up" buttons
    - "App is hibernating"
-4. **Wake Up Action**: If sleeping, attempts to:
-   - Click specific wake-up buttons
+5. **Wake Up Action**: If sleeping, attempts to:
+   - Click specific wake-up buttons using modern selectors
    - Simulate user interaction by clicking on the page
-5. **Verify Success**: Checks if the app is now awake
-6. **Screenshot**: Captures a screenshot for debugging
+6. **Verify Success**: Uses `waitForFunction()` to confirm wake-up completion
+7. **Screenshot**: Captures a screenshot for debugging
+
+**Modern Puppeteer Features Used:**
+- `waitForSelector()` instead of deprecated `waitForTimeout()`
+- `waitForFunction()` for complex waiting conditions
+- `networkidle2` for proper page load detection
+- Event-driven waiting instead of fixed delays
 
 ### 5. How to Adjust Access Frequency
 Modify the cron expression to adjust access frequency:
