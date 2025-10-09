@@ -32,6 +32,10 @@ def wake_up_streamlit_app():
     chrome_options.add_argument('--no-zygote')
     chrome_options.add_argument('--disable-gpu')
     chrome_options.add_argument('--window-size=1920,1080')
+    chrome_options.add_argument('--disable-web-security')
+    chrome_options.add_argument('--allow-running-insecure-content')
+    chrome_options.add_argument('--disable-extensions')
+    chrome_options.add_argument('--disable-plugins')
     user_agent = ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
                   'AppleWebKit/537.36 (KHTML, like Gecko) '
                   'Chrome/91.0.4472.124 Safari/537.36')
@@ -49,9 +53,25 @@ def wake_up_streamlit_app():
         print("🌐 Visit Streamlit app...")
         driver.get("https://climviz.streamlit.app/")
 
-        wait = WebDriverWait(driver, 10)
+        wait = WebDriverWait(driver, 30)
         try:
             wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
+            print("✅ Body element loaded")
+            
+            try:
+                driver.execute_script("return document.readyState") == "complete"
+                print("✅ Document ready state complete")
+            except Exception:
+                pass
+                        
+            try:
+                wait.until(lambda driver: len(driver.find_elements(By.CSS_SELECTOR, "div, span, p, h1, h2, h3")) > 0)
+                print("✅ Content elements detected")
+            except TimeoutException:
+                print("⚠️ No content elements found, continue...")
+            
+            time.sleep(5)
+            
         except TimeoutException:
             print("⚠️ Page load timeout, continue...")
 
@@ -102,7 +122,7 @@ def wake_up_streamlit_app():
                     print("⚠️ Cannot click page element")
 
             print("⏳ Wait for app to wake up...")
-            time.sleep(3)
+            time.sleep(20)
 
             try:
                 updated_body_element = driver.find_element(By.TAG_NAME, "body")
