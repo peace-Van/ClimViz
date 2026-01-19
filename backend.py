@@ -10,7 +10,7 @@ import plotly.graph_objects as go
 import googlemaps
 from googlemaps.exceptions import ApiError, HTTPError, Timeout, TransportError
 import time
-import h5py
+import xarray as xr
 from TorchModel import DLModel
 from numba import njit
 from functools import lru_cache
@@ -128,7 +128,7 @@ def calc_variables(data: np.ndarray) -> np.ndarray:
 
 # only used for change rate chart
 def calc_change_rate(
-    variable_file: h5py.File,
+    variable_file: xr.Dataset,
     indices: np.ndarray,
     elev: np.ndarray,
     variable_type: str,
@@ -137,7 +137,10 @@ def calc_change_rate(
     unit: bool = False,
 ) -> pd.DataFrame:
     x = np.array([i for i in range(yr, yr + yrs)], dtype=np.float32)
-    data = variable_file.get("res")[:-1, yr: yr + yrs, :]
+    data = variable_file["res"].isel(
+        pixel=slice(None, -1),
+        year=slice(yr, yr + yrs),
+    ).values
 
     values = process_variables_trend(
         data, x, VARIABLE_TYPE_INDICES[variable_type], unit
@@ -196,7 +199,7 @@ class ClimateDataset:
 
         self.aridity_index = np.zeros((n_samples,), dtype=np.float32)
         self.thermal_index = np.zeros((n_samples,), dtype=np.float32)
-        self.probabilities = np.zeros((n_samples, 26), dtype=np.float32)
+        self.probabilities = np.zeros((n_samples, 27), dtype=np.float32)
         for i in range(0, n_samples, batch_size):
             batch = np.array(
                 [
@@ -294,7 +297,7 @@ class ClimateDataset:
         #     # Find index of 'Dm' in DLClassification.class_map
         #     from climate_classification import DLClassification
         #     dm_idx = DLClassification.class_map.index('Dm')
-        #     # self.probabilities shape: (n, 26)
+        #     # self.probabilities shape: (n, 27)
         #     probs = self.probabilities[:, dm_idx]
         #     # Only keep points with prob > 0.01
         #     lats, lons = zip(*self.data.keys())
@@ -362,7 +365,7 @@ class ClimateDataset:
 
 
 def get_average(
-    yr: int, yrs: int, datafile: h5py.File, indices: np.ndarray, elev: np.ndarray
+    yr: int, yrs: int, datafile: xr.Dataset, indices: np.ndarray, elev: np.ndarray
 ) -> ClimateDataset:
     """
     process climate data
@@ -383,11 +386,11 @@ def get_average(
     res = {}
 
     # pre-calculate the monthly average of all data
-    tmp_mean = np.mean(datafile["tmp"][:, yr: yr + yrs, :], axis=1)
-    pre_mean = np.mean(datafile["pre"][:, yr: yr + yrs, :], axis=1)
-    pet_mean = np.mean(datafile["pet"][:, yr: yr + yrs, :], axis=1)
-    tmn_mean = np.mean(datafile["tmn"][:, yr: yr + yrs, :], axis=1)
-    tmx_mean = np.mean(datafile["tmx"][:, yr: yr + yrs, :], axis=1)
+    tmp_mean = datafile["tmp"].isel(year=slice(yr, yr + yrs)).mean(dim="year").values
+    pre_mean = datafile["pre"].isel(year=slice(yr, yr + yrs)).mean(dim="year").values
+    pet_mean = datafile["pet"].isel(year=slice(yr, yr + yrs)).mean(dim="year").values
+    tmn_mean = datafile["tmn"].isel(year=slice(yr, yr + yrs)).mean(dim="year").values
+    tmx_mean = datafile["tmx"].isel(year=slice(yr, yr + yrs)).mean(dim="year").values
 
     for i in range(tmp_mean.shape[0]):
 

@@ -3,6 +3,7 @@ import numpy as np
 import plotly.express as px
 import pandas as pd
 import torch
+import xarray as xr
 from backend import (
     ClimateData,
     ClimateDataset,
@@ -16,7 +17,6 @@ from backend import (
     LATEST_YEAR,
     lighten, 
 )
-import h5py
 from climate_classification import (
     KoppenClassification,
     TrewarthaClassification,
@@ -182,18 +182,18 @@ COLOR_SCHEMES = {
 
 
 @st.cache_resource
-def load_resources() -> tuple[h5py.File, np.ndarray, np.ndarray, h5py.File, LocationService]:
-    data_file = h5py.File("dataset/climate_data_land.h5", "r", swmr=True)
-    indices = data_file.get("indices")[:]
-    elev = data_file.get("elev")[:].squeeze()
-    variable_file = h5py.File("dataset/climate_variables.h5", "r", swmr=True)
+def load_resources() -> tuple[xr.Dataset, np.ndarray, np.ndarray, xr.Dataset, LocationService]:
+    data_file = xr.open_dataset("dataset/climate_data_land.nc", engine="h5netcdf")
+    indices = np.column_stack([data_file["lat"].values, data_file["lon"].values])
+    elev = data_file["elev"].values.squeeze()
+    variable_file = xr.open_dataset("dataset/climate_variables.nc", engine="h5netcdf")
     locationService = LocationService()  # Will use GOOGLE_MAPS_API_KEY environment variable
     return data_file, indices, elev, variable_file, locationService
 
 
 @st.cache_resource
 def load_default_data(
-    _data_file: h5py.File, _indices: np.ndarray, _elev: np.ndarray, _network: DLModel
+    _data_file: xr.Dataset, _indices: np.ndarray, _elev: np.ndarray, _network: DLModel
 ) -> ClimateDataset:
     return calc_climate_normals(94, 30, _data_file, _indices, _elev, _network)
 
@@ -201,7 +201,7 @@ def load_default_data(
 def calc_climate_normals(
     start_year: int,
     years: int,
-    data_file: h5py.File,
+    data_file: xr.Dataset,
     indices: np.ndarray,
     elev: np.ndarray,
     network: DLModel,
@@ -681,6 +681,7 @@ if __name__ == "__main__":
                     df = st.session_state["climate_data"].prepare_map_data(
                         st.session_state["map_type"], unit=st.session_state["unit"]
                     )
+                # df.to_csv(f"df_{st.session_state['map_type']}.csv", index=False)
 
         gc.collect()
 
@@ -1023,11 +1024,11 @@ if __name__ == "__main__":
                                     (indices[:, 0] == point_location[0])
                                     & (indices[:, 1] == point_location[1])
                                 )[0]
-                                y = variable_file.get("res")[
-                                    idx,
-                                    :,
-                                    VARIABLE_TYPE_INDICES[st.session_state["map_type"]],
-                                ].squeeze()
+                                pixel_idx = int(idx[0])
+                                y = variable_file["res"].isel(
+                                    pixel=pixel_idx,
+                                    variable=VARIABLE_TYPE_INDICES[st.session_state["map_type"]],
+                                ).values
                                 st.toggle(
                                     "30-year moving average",
                                     value=True,
@@ -1085,7 +1086,7 @@ if __name__ == "__main__":
 
         elif st.session_state["show_global_trend"]:
             x = [i for i in range(1901, LATEST_YEAR + 1)]
-            global_avg = variable_file.get("res")[-1, :, :]
+            global_avg = variable_file["res"].isel(pixel=-1).values
             match st.session_state["map_type"]:
                 case "Köppen-Geiger Classification" | "Trewartha Classification":
                     cols = st.columns(3)
