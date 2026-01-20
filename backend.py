@@ -913,8 +913,8 @@ def create_probability_chart(
 
 def discretize_thermal_index(arr):
     arr = np.asarray(arr)
-    bins = np.array([-np.inf, -1, 0, 1, np.inf])
-    labels = ['arctic/subarctic', 'cool temperate', 'warm temperate', 'tropical/subtropical']
+    bins = np.array([-np.inf, -1.2, -0.4, 0.4, 1.2, np.inf])
+    labels = ['polar/subpolar', 'cold', 'cool', 'warm', 'tropical/subtropical']
     inds = np.digitize(arr, bins) - 1
     return np.array([labels[i] for i in inds])
 

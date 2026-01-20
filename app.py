@@ -166,9 +166,10 @@ COLOR_SCHEMES = {
     },
     "Thermal Index": "balance",
     "Thermal Index (Discretized)": {
-        "arctic/subarctic": "rgb(41, 58, 143)",
-        "cool temperate": "rgb(69, 144, 185)",
-        "warm temperate": "rgb(230, 210, 204)",
+        "polar/subpolar": "rgb(41, 58, 143)",
+        "cold": "rgb(56, 106, 178)",
+        "cool": "rgb(69, 144, 185)",
+        "warm": "rgb(230, 210, 204)",
         "tropical/subtropical": "rgb(172, 43, 36)",
     },
     "Coldest Month Mean Temperature": "delta",
@@ -739,7 +740,7 @@ if __name__ == "__main__":
                     color_discrete_map=COLOR_SCHEMES["Thermal Index (Discretized)"],
                     hover_data={"elev": True, "value": True},
                     opacity=0.8,
-                    category_orders={"value": ["arctic/subarctic", "cool temperate", "warm temperate", "tropical/subtropical"]},
+                    category_orders={"value": ["polar/subpolar", "cold", "cool", "warm", "tropical/subtropical"]},
                 )
                 fig.update_traces(
                     hovertemplate=(
