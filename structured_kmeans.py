@@ -51,7 +51,7 @@ class StructuredKMeans(nn.Module):
         distances = torch.cdist(x, self.centers, p=2) ** 2  # (Batch, n_clusters) 
         # use softmax to calculate the probability
         # # use -distances * 4 to make the probability more concentrated
-        prob = torch.softmax(-distances, dim=1)  # (Batch, n_clusters)
+        prob = F.softmin(distances, dim=1)  # (Batch, n_clusters)
         return distances, prob
 
     def compute_loss(self, x):
