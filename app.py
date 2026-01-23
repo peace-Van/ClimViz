@@ -913,7 +913,7 @@ if __name__ == "__main__":
     if st.session_state["fig"] is not None:
         clicked_point = st.plotly_chart(
             st.session_state["fig"],
-            use_container_width=True,
+            width='stretch',
             on_select="rerun",  # when there is a click event, rerun the app
             selection_mode="points",
             key="map",  # must provide the key parameter
